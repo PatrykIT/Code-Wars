@@ -36,7 +36,7 @@ public:
         return result;
     }
 
-    static void Save_Combination(const std::vector<int>& combination)
+    static void Save_Combination(const std::vector<int>& combination, std::vector<int> &all_combinations)
     {
       for (int i = 0; i < combination.size(); ++i)
       {
@@ -45,27 +45,39 @@ public:
       }
     }
 
-    static void Create_All_Unique_Combinations(int offset, int k)
+    static void Create_All_Unique_Combinations(int offset, int k, std::vector<int> &all_combinations, std::vector<int> &list_of_distances)
     {
       static std::vector<int> combinations;
       if (k == 0)
       {
-        Save_Combination(combinations);
+        Save_Combination(combinations, all_combinations);
         return;
       }
 
       for (int i = offset; i <= list_of_distances.size() - k; ++i)
       {
         combinations.push_back(list_of_distances[i]);
-        Create_All_Unique_Combinations(i+1, k-1);
+        Create_All_Unique_Combinations(i+1, k-1, all_combinations, list_of_distances);
         combinations.pop_back();
       }
     }
 
-    static int chooseBestSum(int max_distance, int towns_to_visit, std::vector<int>& list_of_distances)
+    static int chooseBestSum(int max_distance, int towns_to_visit, std::vector<int>& list_of_distances_arg)
     {
-      BestTravel::list_of_distances = list_of_distances;
-      Create_All_Unique_Combinations(0, towns_to_visit);
+      Debug_Info(__func__, __LINE__, max_distance, towns_to_visit, list_of_distances_arg);
+      static std::vector<int> all_combinations;
+      static std::vector<int> list_of_distances;
+      list_of_distances = list_of_distances_arg;
+
+
+      if(towns_to_visit > list_of_distances.size())
+      {
+          all_combinations.clear();
+          list_of_distances.clear();
+          return -1;
+      }
+
+      Create_All_Unique_Combinations(0, towns_to_visit, all_combinations, list_of_distances);
 
       /* Sum each subarrays from 'all_combinations' vector. */
       const int subarrays_count = Number_of_Unique_Combinations(list_of_distances.size(), towns_to_visit);
@@ -82,7 +94,6 @@ public:
           unique_sums_of_paths.push_back(sum);
       }
 
-      /*TO DO: Here we can chceck if maybe there is a case, that all paths are too long. */
       int not_good_paths = 0;
 
       /* Count the difference between maximum distance and path distances */
@@ -121,9 +132,18 @@ public:
       return sum_of_best_path;
     }
 
-    static std::vector<int> all_combinations;
-    static std::vector<int> list_of_distances;
-};
+    static void Debug_Info(std::string function_name, int line_of_code, int max_distance, int towns_to_visit, std::vector<int> numbers = {})
+    {
+        cout << "Function: " << function_name << " | Line: " << line_of_code << " ";
 
-//std::vector<int> BestTravel::all_combinations;
-//std::vector<int> BestTravel::list_of_distances;
+        if(!numbers.empty())
+        {
+            cout << "Numbers: ";
+            for(auto x : numbers)
+                cout << x << " ";
+            cout << endl;
+        }
+        cout << "Max distance: " << max_distance << ". Towns to visit: " << towns_to_visit;
+        cout << endl;
+    }
+};
