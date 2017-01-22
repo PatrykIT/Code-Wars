@@ -8,11 +8,20 @@
 using std::cout;
 using std::endl;
 
+namespace BigNumber
+{
+    template<typename T, typename = std::enable_if_t<std::is_integral<T>::value, T>>
+    static int* GetFactorial(T number)
+    {
+      return nullptr;
+    }
+}
+
 class BestTravel
 {
 public:
 
-    template <typename T>
+    template<typename T, typename = std::enable_if_t<std::is_integral<T>::value, T>>
     static T GetFactorial(T number)
     {
         T result = 1;
@@ -27,24 +36,39 @@ public:
      * @param k - subset of elements for combination
      * @return - number of possible unique combinations
      */
-    static unsigned int Number_of_Unique_Combinations(const size_t n, const unsigned int k)
+    static size_t Number_of_Unique_Combinations(const size_t n, const size_t k)
     {
-        const size_t n_factorial = GetFactorial(n);
-        const unsigned int k_factorial = GetFactorial(k);
+        /* 20! is the biggest factorial C++ can handle (long long int) */
+        if(k <= 20 && n <= 20)
+        {
+            const auto n_factorial = GetFactorial<size_t>(n);
+            const auto k_factorial = GetFactorial<size_t>(k);
 
-        const unsigned int result = n_factorial / (k_factorial * (GetFactorial(n-k)));
-        return result;
+            const auto result = n_factorial / (k_factorial * (GetFactorial<size_t>(n-k)));
+            return result;
+        }
+        /* Handle very big number, larger then maximum numerical type in C++ */
+        else
+        {
+            const auto n_factorial = BigNumber::GetFactorial<size_t>(n);
+        }
     }
 
     static void Save_Combination(const std::vector<int>& combination, std::vector<int> &all_combinations)
     {
       for (int i = 0; i < combination.size(); ++i)
       {
-          //cout << combination[i] << " ";
           all_combinations.push_back(combination[i]);
       }
     }
 
+    /**
+     * @brief Create_All_Unique_Combinations - function that transforms a combination like:  [1, 2, 3, 4] with k = 2, to: [ [1, 2][1, 3][1, 4][2, 3][2, 4][3, 4] ]
+     * @param offset
+     * @param k - amount of distances in single array.
+     * @param all_combinations - output. To this list we save all possible combinations.
+     * @param list_of_distances - input. From this list we create all possible combinations.
+     */
     static void Create_All_Unique_Combinations(int offset, int k, std::vector<int> &all_combinations, std::vector<int> &list_of_distances)
     {
       static std::vector<int> combinations;
@@ -62,7 +86,7 @@ public:
       }
     }
 
-    static int chooseBestSum(int max_distance, int towns_to_visit, std::vector<int>& list_of_distances_arg)
+    static size_t chooseBestSum(int max_distance, int towns_to_visit, std::vector<int>& list_of_distances_arg)
     {
       Debug_Info(__func__, __LINE__, max_distance, towns_to_visit, list_of_distances_arg);
       static std::vector<int> all_combinations;
@@ -79,31 +103,38 @@ public:
 
       Create_All_Unique_Combinations(0, towns_to_visit, all_combinations, list_of_distances);
 
-      /* Sum each subarrays from 'all_combinations' vector. */
-      const int subarrays_count = Number_of_Unique_Combinations(list_of_distances.size(), towns_to_visit);
-      std::vector<int> unique_sums_of_paths;
+      const size_t subarrays_count = Number_of_Unique_Combinations(list_of_distances.size(), towns_to_visit);
+      std::vector<long long> unique_sums_of_paths;
 
-      for(int current_array = 0; current_array < subarrays_count; ++current_array)
+      /* Sum each subarrays from 'all_combinations' vector. */
+      for(size_t current_array = 0; current_array < subarrays_count; ++current_array)
       {
-          int sum = 0;
-          int offset = current_array * towns_to_visit; //We have to multiply by 'towns_to_visit' so we can sum all elements of given array.
-          for(int a = offset; a < offset + towns_to_visit; ++a)
+          size_t sum = 0;
+          size_t offset = current_array * towns_to_visit; //We have to multiply by 'towns_to_visit' so we can sum all elements of given array.
+          for(size_t a = offset; a < offset + towns_to_visit; ++a)
           {
               sum += all_combinations[a];
           }
           unique_sums_of_paths.push_back(sum);
       }
 
-      int not_good_paths = 0;
+      size_t not_good_paths = 0;
 
       /* Count the difference between maximum distance and path distances */
       for(auto &&path : unique_sums_of_paths)
       {
-          path = max_distance - path; //Result  must be > 0. Otherwise it means that path was initially too big, and can't be counted.
-          if(path < 0) //If path is greater then the maximum distance, set it to very big value, so the function std::min_element would ignore it.
+          /* Result  should be > 0. Otherwise it means that path was initially too big, and can't be counted. */
+          bool too_long_path = (max_distance - path) < 0 ? true : false;
+
+          if(too_long_path)
           {
-              path = std::numeric_limits<int>::max();
+              /* If path is greater then the maximum distance, set it to very big value, so the function std::min_element would ignore it. */
+              path = std::numeric_limits<long long>::max();
               ++not_good_paths;
+          }
+          else
+          {
+              path = max_distance - path;
           }
       }
 
@@ -117,11 +148,11 @@ public:
       /* Take the iterator from the best sum of paths, and find its corresponding subarray. */
       auto &&best_path = std::min_element(unique_sums_of_paths.begin(), unique_sums_of_paths.end());
 
-      int best_subarray_number = std::distance(unique_sums_of_paths.begin(), best_path);
-      int starting_index_of_best_subarray = best_subarray_number * towns_to_visit;
-      int sum_of_best_path = 0;
+      auto best_subarray_number = std::distance(unique_sums_of_paths.begin(), best_path);
+      auto starting_index_of_best_subarray = best_subarray_number * towns_to_visit;
+      size_t sum_of_best_path = 0;
 
-      for(int i = starting_index_of_best_subarray ; i < starting_index_of_best_subarray + towns_to_visit; ++i)
+      for(auto i = starting_index_of_best_subarray ; i < starting_index_of_best_subarray + towns_to_visit; ++i)
       {
           sum_of_best_path += all_combinations[i];
       }
@@ -129,6 +160,7 @@ public:
       all_combinations.clear();
       list_of_distances.clear();
 
+      cout << "Answer: " << sum_of_best_path << "\n";
       return sum_of_best_path;
     }
 

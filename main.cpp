@@ -139,7 +139,7 @@ public:
 };
 #endif
 
-void testequal(int a, int b)
+void testequal(size_t a, int b)
 {
     bool result = a == b;
     cout << result << endl;
@@ -147,8 +147,10 @@ void testequal(int a, int b)
 
 void Tests()
 {
+    size_t n;
+
     std::vector<int> ts = {50, 55, 56, 57, 58};
-    int n = BestTravel::chooseBestSum(163, 3, ts);
+    n = BestTravel::chooseBestSum(163, 3, ts);
     testequal(n, 163);
 
     ts = {50};
@@ -186,7 +188,17 @@ void Tests()
     testequal(n, 600);
 
     n = BestTravel::chooseBestSum(2430, 15, std::vector<int>{100, 76, 56, 44, 89, 73, 68, 56, 64, 123, 2333, 144, 50, 132, 123, 34, 89});
-    testequal(n, 1);
+    testequal(n, 1287);
+
+
+
+//    n = BestTravel::chooseBestSum(485, 4, std::vector<int>{298, 93, 289, 117, 43, 185, 325, 251, 79, 458, 36, 175, 474, 312, 326, 152, 75,
+//                                                             253, 191, 463, 353});
+//    testequal(n, 485); //Gives 484 :/
+
+//    n = BestTravel::chooseBestSum(845, 3, std::vector<int>{468, 248, 165, 87, 265, 405, 59, 254, 366, 196, 16, 37, 460, 343, 431, 178, 400,
+//                                                           160, 260, 25, 493, 234, 59, 273});
+//    testequal(n, 845); //Gives -1 :/
 
 
     cout << "Bye bye.\n";
