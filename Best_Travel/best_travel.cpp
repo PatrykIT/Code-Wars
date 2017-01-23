@@ -11,11 +11,50 @@ using std::endl;
 namespace BigNumber
 {
     template<typename T, typename = std::enable_if_t<std::is_integral<T>::value, T>>
-    static int* GetFactorial(T number)
+    static std::vector<int> GetFactorial(T number)
     {
-      return nullptr;
+        // Apply simple factorial formula n! = 1 * 2 * 3 * 4...*n
+        std::vector<int> result = multiply_3(number);
+
+        std::reverse(result.begin(), result.end());
+
+        cout << "Result: ";
+        for (auto &it = result.cbegin(); it != result.cend(); ++it)
+            cout << *it;
+
+        return result;
+    }
+
+    static std::vector<int> multiply_3(int number)
+    {
+        std::vector<int> result {1};
+
+        for(int x = 2; x <= number; x++)
+        {
+            int carry = 0;
+
+            // One by one multiply n with individual digits of res[]
+            for (int i = 0; i < result.size(); i++)
+            {
+                int prod = result.at(i) * x + carry;
+                result.at(i) = prod % 10;  // Store last digit of 'prod' in res[]
+                carry  = prod / 10;    // Put rest in carry
+            }
+
+            while (carry)
+            {
+                result.emplace_back(carry % 10);
+                carry = carry / 10;
+            }
+        }
+        return result;
     }
 }
+
+
+
+
+
 
 class BestTravel
 {
@@ -50,7 +89,11 @@ public:
         /* Handle very big number, larger then maximum numerical type in C++ */
         else
         {
-            const auto n_factorial = BigNumber::GetFactorial<size_t>(n);
+           if( n > 20)
+               std::vector<int> n_factorial = BigNumber::GetFactorial<size_t>(n);
+           else
+               const auto n_factorial = GetFactorial<size_t>(n);
+           /* TO CONTINUE FROM HERE */
         }
     }
 
