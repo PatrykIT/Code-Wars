@@ -14,7 +14,7 @@ namespace BigNumber
     static std::vector<int> GetFactorial(T number)
     {
         // Apply simple factorial formula n! = 1 * 2 * 3 * 4...*n
-        std::vector<int> result = multiply_3(number);
+        std::vector<int> result = multiply(number);
 
         std::reverse(result.begin(), result.end());
 
@@ -25,7 +25,7 @@ namespace BigNumber
         return result;
     }
 
-    static std::vector<int> multiply_3(int number)
+    static std::vector<int> multiply(int number)
     {
         std::vector<int> result {1};
 
@@ -48,6 +48,31 @@ namespace BigNumber
             }
         }
         return result;
+    }
+
+    static std::vector<int> Multiply_from_Vector(std::vector<int> &lhs, size_t rhs)
+    {
+    /* Return lhs * rhs */
+        return {};
+    }
+    static std::vector<int> Multiply_from_Vector(std::vector<size_t> lhs, size_t rhs) //This overload allows us creating vector when calling a function.
+    {
+    /* Return lhs * rhs */
+        return {};
+    }
+
+    static size_t Divide_Vector_by_Vector(std::vector<int> &lhs, std::vector<int> &rhs)
+    {
+        return 0;
+    }
+
+    static size_t Divide_Number_by_Vector(size_t lhs, std::vector<int> &rhs)
+    {
+        return 0;
+    }
+    static size_t Divide_Vector_by_Number(std::vector<int> &lhs, size_t rhs)
+    {
+        return 0;
     }
 }
 
@@ -82,18 +107,46 @@ public:
         {
             const auto n_factorial = GetFactorial<size_t>(n);
             const auto k_factorial = GetFactorial<size_t>(k);
+            const auto division = k_factorial * GetFactorial<size_t>(n-k);
 
-            const auto result = n_factorial / (k_factorial * (GetFactorial<size_t>(n-k)));
+            const auto result = n_factorial / division;
             return result;
         }
         /* Handle very big number, larger then maximum numerical type in C++ */
         else
         {
-           if( n > 20)
-               std::vector<int> n_factorial = BigNumber::GetFactorial<size_t>(n);
-           else
-               const auto n_factorial = GetFactorial<size_t>(n);
-           /* TO CONTINUE FROM HERE */
+           std::vector<int> n_factorial_big, k_factorial_big, division_big;
+           size_t n_factorial, k_factorial;
+           size_t n_substract_k_factorial = GetFactorial<size_t>(n-k);
+
+            if(n > 20)
+            {
+               n_factorial_big = BigNumber::GetFactorial<size_t>(n);
+            }
+            else
+            {
+               n_factorial = GetFactorial<size_t>(n);
+            }
+            if(k > 20)
+            {
+               k_factorial_big = BigNumber::GetFactorial<size_t>(k);
+               division_big = BigNumber::Multiply_from_Vector(k_factorial_big, n_substract_k_factorial);
+            }
+            else
+            {
+               k_factorial = GetFactorial<size_t>(k);
+               division_big = BigNumber::Multiply_from_Vector({k_factorial}, n_substract_k_factorial);
+            }
+
+            size_t result;
+
+            if(n > 20)
+                result = BigNumber::Divide_Vector_by_Vector(n_factorial_big, division_big); //result = n_factorial_big / division;
+            else if(n < 20)
+                result = BigNumber::Divide_Number_by_Vector(n_factorial, division_big); //result = n_factorial / division;
+
+
+            return result;
         }
     }
 
