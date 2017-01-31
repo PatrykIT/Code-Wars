@@ -204,9 +204,67 @@ void Tests()
     cout << "Bye bye.\n";
 }
 
+void Vectors()
+{
+    std::vector<int> numbers {1, 2, 3};
+    int number_2 = 15;
+    std::vector<int> multiplayer {1, 5}; //TODO: This have to be automated, to transform int to std::vector<int>
+
+    int number_of_digits = 0;
+    auto count_digits = [number_2, &number_of_digits]() mutable -> int { while(number_2) { ++number_of_digits; number_2 /= 10; } return number_of_digits; };
+    int numbers_of_holding_vectors = count_digits();
+
+    std::vector<std::vector<int>> holding_numbers; //Use std::deque in future (faster front insertions)
+    int current_depth = 0, carry = 0, rest = 0;
+
+    /* Start with 5, then 1. Multiply 5 by 3, then 2, then 1. */
+    for(auto &it = multiplayer.rbegin(); it != multiplayer.rend(); ++it)
+    {
+        for(auto &numbers_it = numbers.rbegin(); numbers_it != numbers.rend(); ++numbers_it)
+        {
+            /* Multiply individual integers */
+            //cout << "1 & 2: " << *it << " | " << *numbers_it << endl;
+            cout << *it << endl;
+            int result = (*it) * (*numbers_it);
+            /* If sum is bigger then one integer */
+            if(result > 9)
+            {
+                carry = result / 10; //Value to be moved to the next integer
+                rest = result % 10;
+
+                result = rest;
+
+                /* Put the carry integer to the next place in numbers. */
+                //TO DO: CHECK IF THERE IS NEXT ITERATOR
+                std::vector<int>::reverse_iterator insert_here = std::next(numbers_it); //TO DO: THIS IS A BUG! It overwrites the original number. It needs to make a copy instead, and remember it for a next iteration.
+                *insert_here += carry;
+            }
+            if(holding_numbers.begin() + current_depth == holding_numbers.end())
+            {
+                holding_numbers.emplace_back(std::vector<int> {result}); //Will put a std::vector with first value.
+            }
+            else
+            {
+                holding_numbers.at(current_depth).insert(holding_numbers[current_depth].begin(), result);
+            }
+
+        }
+        ++current_depth;
+    }
+
+    /* Before addition, we need to fill vector with 0's in the empty places. */
+
+}
+
 int main(int argc, char *argv[])
 {
-    Tests();
+    //Tests();
+
+    //BigNumber::factorial_3(24);
+    //factorial_3(24);
+
+
+    Vectors();
 
     return 0;
 }
