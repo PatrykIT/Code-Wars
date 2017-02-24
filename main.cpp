@@ -204,16 +204,8 @@ void Tests()
     cout << "Bye bye.\n";
 }
 
-void Vectors()
+std::vector<std::vector<int>> Multiply_Vectors(std::vector<int> &multiplayer, std::vector<int> &numbers)
 {
-    std::vector<int> multiplayer {1, 5}; //TODO: This have to be automated, to transform int to std::vector<int>
-    std::vector<int> numbers {1, 2, 3};
-    int number_2 = 15;
-
-    int number_of_digits = 0;
-    auto count_digits = [number_2, &number_of_digits]() mutable -> int { while(number_2) { ++number_of_digits; number_2 /= 10; } return number_of_digits; };
-    int numbers_of_holding_vectors = count_digits();
-
     std::vector<std::vector<int>> holding_numbers; //Use std::deque in future (faster front insertions)
     int current_depth = 0, carry = 0;
     bool is_carry_available = false;
@@ -263,9 +255,37 @@ void Vectors()
         ++current_depth;
     }
 
+    return holding_numbers;
+}
+
+void Vectors()
+{
+    std::vector<int> multiplayer {1, 5}; //TODO: This have to be automated, to transform int to std::vector<int>
+    std::vector<int> numbers {1, 2, 3};
+    int number_2 = 15;
+
+    int number_of_digits = 0;
+    auto count_digits = [number_2, &number_of_digits]() mutable -> int { while(number_2) { ++number_of_digits; number_2 /= 10; } return number_of_digits; };
+    int numbers_of_holding_vectors = count_digits();
+
+    std::vector<std::vector<int>> holding_numbers = Multiply_Vectors(multiplayer, numbers);
+
     /* Before addition, we need to fill vector with 0's in the empty places. */
 
 }
+
+#include <cassert>
+void Test_Vector_Multiplication()
+{
+    std::vector<std::vector<int>> result;
+
+    result = Multiply_Vectors(std::vector<int> {1, 5}, std::vector<int> {1, 2, 3});
+    std::cout << (result[0])[0] << "\n";
+    assert(result[0][2] == 5 && result[0][1] == 1 && result[0][0] == 6);
+    assert(result[1][2] == 3 && result[1][1] == 2 && result[1][0] == 1);
+
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -275,7 +295,9 @@ int main(int argc, char *argv[])
     //factorial_3(24);
 
 
-    Vectors();
+    //Vectors();
+
+    Test_Vector_Multiplication();
 
     return 0;
 }

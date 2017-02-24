@@ -53,6 +53,8 @@ namespace BigNumber
     static std::vector<int> Multiply_from_Vector(std::vector<int> &lhs, size_t rhs)
     {
     /* Return lhs * rhs */
+
+
         return {};
     }
     static std::vector<int> Multiply_from_Vector(std::vector<size_t> lhs, size_t rhs) //This overload allows us creating vector when calling a function.
