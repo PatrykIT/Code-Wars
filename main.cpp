@@ -215,7 +215,8 @@ void Vectors()
     int numbers_of_holding_vectors = count_digits();
 
     std::vector<std::vector<int>> holding_numbers; //Use std::deque in future (faster front insertions)
-    int current_depth = 0, carry = 0, rest = 0;
+    int current_depth = 0, carry = 0;
+    bool is_carry_available = false;
 
     /* Start with 5, then 1. Multiply 5 by 3, then 2, then 1. */
     for(auto &multiplayer_it = multiplayer.rbegin(); multiplayer_it != multiplayer.rend(); ++multiplayer_it)
@@ -224,30 +225,29 @@ void Vectors()
         {
             /* Multiply individual integers */
             int result = (*multiplayer_it) * (*numbers_it);
+
+            /* If there is a "rest" from previous multiplication, add it here. I.e: 5 * 3 = 15. 5 is written, and 1 is saved as a carry, which would be added here. */
+            if(is_carry_available == true)
+            {
+                result += carry;
+                is_carry_available = false;
+            }
+
             /* If sum is bigger then one integer */
             if(result > 9)
             {
+                carry = result / 10; //Value to be moved to the next integer
+                result = result % 10;
+                is_carry_available = true;
+
                 /* If we reached the end of numbers to multiply */
-                if(numbers_it == numbers.begin())
+                if(numbers_it == numbers.rend() -1)
                 {
-                    /* Put the carry integer to the next place in numbers. */
-                    carry = result / 10; //Value to be moved to the next integer
-                    rest = result % 10;
-                    result = rest;
-
                     /* Push front: carry, rest. So it would be: [carry, rest, x, y, z] */
-                    holding_numbers.at(current_depth).insert(holding_numbers[current_depth].begin(), rest);
+                    holding_numbers.at(current_depth).insert(holding_numbers[current_depth].begin(), result); //TO DO: There should be an if checking if vector to insert is empty. Same check as below.
                     holding_numbers.at(current_depth).insert(holding_numbers[current_depth].begin(), carry);
+                    is_carry_available = false;
                     continue;
-                }
-                else
-                {
-                    //Split "result" to 2 single ints, and put them at the beginning of vector. Then don't insert result in below lines (so add some bool variable and check it there).
-                    //std::vector<int>::reverse_iterator insert_here = std::next(numbers_it); //TO DO: THIS IS A BUG! It overwrites the original number. It needs to make a copy instead, and remember it for a next iteration.
-                    //*insert_here += carry;
-
-                    continue;
-
                 }
             }
             if(holding_numbers.begin() + current_depth == holding_numbers.end())
