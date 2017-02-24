@@ -206,9 +206,9 @@ void Tests()
 
 void Vectors()
 {
+    std::vector<int> multiplayer {1, 5}; //TODO: This have to be automated, to transform int to std::vector<int>
     std::vector<int> numbers {1, 2, 3};
     int number_2 = 15;
-    std::vector<int> multiplayer {1, 5}; //TODO: This have to be automated, to transform int to std::vector<int>
 
     int number_of_digits = 0;
     auto count_digits = [number_2, &number_of_digits]() mutable -> int { while(number_2) { ++number_of_digits; number_2 /= 10; } return number_of_digits; };
@@ -218,26 +218,37 @@ void Vectors()
     int current_depth = 0, carry = 0, rest = 0;
 
     /* Start with 5, then 1. Multiply 5 by 3, then 2, then 1. */
-    for(auto &it = multiplayer.rbegin(); it != multiplayer.rend(); ++it)
+    for(auto &multiplayer_it = multiplayer.rbegin(); multiplayer_it != multiplayer.rend(); ++multiplayer_it)
     {
         for(auto &numbers_it = numbers.rbegin(); numbers_it != numbers.rend(); ++numbers_it)
         {
             /* Multiply individual integers */
-            //cout << "1 & 2: " << *it << " | " << *numbers_it << endl;
-            cout << *it << endl;
-            int result = (*it) * (*numbers_it);
+            int result = (*multiplayer_it) * (*numbers_it);
             /* If sum is bigger then one integer */
             if(result > 9)
             {
-                carry = result / 10; //Value to be moved to the next integer
-                rest = result % 10;
+                /* If we reached the end of numbers to multiply */
+                if(numbers_it == numbers.begin())
+                {
+                    /* Put the carry integer to the next place in numbers. */
+                    carry = result / 10; //Value to be moved to the next integer
+                    rest = result % 10;
+                    result = rest;
 
-                result = rest;
+                    /* Push front: carry, rest. So it would be: [carry, rest, x, y, z] */
+                    holding_numbers.at(current_depth).insert(holding_numbers[current_depth].begin(), rest);
+                    holding_numbers.at(current_depth).insert(holding_numbers[current_depth].begin(), carry);
+                    continue;
+                }
+                else
+                {
+                    //Split "result" to 2 single ints, and put them at the beginning of vector. Then don't insert result in below lines (so add some bool variable and check it there).
+                    //std::vector<int>::reverse_iterator insert_here = std::next(numbers_it); //TO DO: THIS IS A BUG! It overwrites the original number. It needs to make a copy instead, and remember it for a next iteration.
+                    //*insert_here += carry;
 
-                /* Put the carry integer to the next place in numbers. */
-                //TO DO: CHECK IF THERE IS NEXT ITERATOR
-                std::vector<int>::reverse_iterator insert_here = std::next(numbers_it); //TO DO: THIS IS A BUG! It overwrites the original number. It needs to make a copy instead, and remember it for a next iteration.
-                *insert_here += carry;
+                    continue;
+
+                }
             }
             if(holding_numbers.begin() + current_depth == holding_numbers.end())
             {
