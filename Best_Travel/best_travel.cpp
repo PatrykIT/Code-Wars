@@ -10,6 +10,7 @@ using std::endl;
 
 namespace BigNumber
 {
+    static std::vector<int> multiply(int number);
     template<typename T, typename = std::enable_if_t<std::is_integral<T>::value, T>>
     static std::vector<int> GetFactorial(T number)
     {
@@ -19,7 +20,7 @@ namespace BigNumber
         std::reverse(result.begin(), result.end());
 
         cout << "Result: ";
-        for (auto &it = result.cbegin(); it != result.cend(); ++it)
+        for (auto it = result.cbegin(); it != result.cend(); ++it)
             cout << *it;
 
         return result;

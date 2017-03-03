@@ -2,10 +2,7 @@
 
 #ifdef In_Main
 
-#include "E:\Qt Projects\CodeWars\Best_Travel\best_travel.cpp"
-
-using std::cout;
-using std::endl;
+#include "Best_Travel\best_travel.cpp"
 
 #else
 
@@ -139,6 +136,9 @@ public:
 };
 #endif
 
+using std::cout;
+using std::endl;
+
 void testequal(size_t a, int b)
 {
     bool result = a == b;
@@ -177,17 +177,21 @@ void Tests()
     n = BestTravel::chooseBestSum(700, 8, ts);
     testequal(n, -1);
 
-    n = BestTravel::chooseBestSum(174, 3, std::vector<int>{50, 55, 57, 58, 60});
+    ts = std::vector<int>{50, 55, 57, 58, 60};
+    n = BestTravel::chooseBestSum(174, 3, ts);
     testequal(n, 173);
 
-    n = BestTravel::chooseBestSum(100, 3, std::vector<int>{50, 100, 150, 200, 250}); //In this TC, values are too big for max. Should be -1.
+    ts = std::vector<int>{50, 100, 150, 200, 250};
+    n = BestTravel::chooseBestSum(100, 3, ts); //In this TC, values are too big for max. Should be -1.
     testequal(n, -1);
 
-    n = BestTravel::chooseBestSum(1000, 3, std::vector<int>{50, 100, 150, 200, 250}); //In this TC, max is too big for values. The correct result should be 600, because of exercise sentence:
+    ts = std::vector<int>{50, 100, 150, 200, 250};
+    n = BestTravel::chooseBestSum(1000, 3, ts); //In this TC, max is too big for values. The correct result should be 600, because of exercise sentence:
                                             // "Which distances they will choose so that the sum of the distances is the biggest possible - to please Mary - but less than k - to please John?"
     testequal(n, 600);
 
-    n = BestTravel::chooseBestSum(2430, 15, std::vector<int>{100, 76, 56, 44, 89, 73, 68, 56, 64, 123, 2333, 144, 50, 132, 123, 34, 89});
+    ts = std::vector<int>{100, 76, 56, 44, 89, 73, 68, 56, 64, 123, 2333, 144, 50, 132, 123, 34, 89};
+    n = BestTravel::chooseBestSum(2430, 15, ts);
     testequal(n, 1287);
 
 
@@ -211,9 +215,9 @@ std::vector<std::vector<int>> Multiply_Vectors(std::vector<int> &multiplayer, st
     bool is_carry_available = false;
 
     /* Start with 5, then 1. Multiply 5 by 3, then 2, then 1. */
-    for(auto &multiplayer_it = multiplayer.rbegin(); multiplayer_it != multiplayer.rend(); ++multiplayer_it)
+    for(auto multiplayer_it = multiplayer.rbegin(); multiplayer_it != multiplayer.rend(); ++multiplayer_it)
     {
-        for(auto &numbers_it = numbers.rbegin(); numbers_it != numbers.rend(); ++numbers_it)
+        for(auto numbers_it = numbers.rbegin(); numbers_it != numbers.rend(); ++numbers_it)
         {
             /* Multiply individual integers */
             int result = (*multiplayer_it) * (*numbers_it);
@@ -279,7 +283,9 @@ void Test_Vector_Multiplication()
 {
     std::vector<std::vector<int>> result;
 
-    result = Multiply_Vectors(std::vector<int> {1, 5}, std::vector<int> {1, 2, 3});
+    std::vector<int> first {1, 5};;
+    std::vector<int> second {1, 2, 3};
+    result = Multiply_Vectors(first, second);
     std::cout << (result[0])[0] << "\n";
     assert(result[0][2] == 5 && result[0][1] == 1 && result[0][0] == 6);
     assert(result[1][2] == 3 && result[1][1] == 2 && result[1][0] == 1);
