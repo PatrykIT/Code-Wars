@@ -1,4 +1,3 @@
-
 #include "best_travel.cpp"
 
 namespace tests
