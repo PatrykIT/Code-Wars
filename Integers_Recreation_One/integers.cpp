@@ -18,7 +18,7 @@ public:
     static std::vector<big> Get_Divisors_of_a_Number(big number)
     {
         std::vector<big> divisors;
-        for(int i = 1; i <= number ; ++i)
+        for(big i = 1; i <= number ; ++i)
         {
             if(number % i == 0)
                 divisors.push_back(i);
@@ -43,7 +43,7 @@ public:
 
     static bool Is_Square(big number)
     {
-        auto root = std::sqrt(number);
+        auto root = std::round(std::sqrt(number)); //Without std::round, it worked on my PC, but on the website, it gave wrong results ;) Lookout for those mines in code.
         return number == (root * root);
     }
 
@@ -52,25 +52,24 @@ public:
         std::vector<big> all_numbers_to_check ( (n - m) +1);
         std::iota(all_numbers_to_check.begin(), all_numbers_to_check.end(), m);
 
-        std::string result {"{"};
+        std::string result;
 
         for(auto &nr : all_numbers_to_check)
         {
             std::vector<big> divisors = Get_Divisors_of_a_Number(nr);
-//            std::cout << "Divisors for: " << nr << " are: \n";
-//            for(auto &nrs : divisors)   std::cout << nrs << "\n";
 
             Square_Numbers(divisors);
             big sum_of_squares = Sum_Squares(divisors);
 
             if(Is_Square(sum_of_squares))
             {
-                result.append("{" + std::to_string(nr) + ", " + std::to_string(sum_of_squares) + "}");
+                result.append("{" + std::to_string(nr) + ", " + std::to_string(sum_of_squares) + "}"
+                              +
+                              ", ");
             }
         }
 
-        result.push_back('}');
-
+        result = "{" + result.substr(0, result.size() -2) + "}";
         return result;
     }
 };

@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
 #ifdef Integers_Recreation_One
     SumSquaredDivisors object;
-    std::cout << object.listSquared(1, 1) << std::endl;
+    std::cout << object.listSquared(1, 250) << std::endl;
 #endif
 
 
