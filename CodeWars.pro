@@ -8,5 +8,5 @@ SOURCES += main.cpp \
     "Best_Travel/vector_arithmetic.cpp" \
     "Best_Travel/test_cases.cpp" \
     "Weight_for_Weight\Weight.cpp" \
-    Integers_Recreation_One/integers.cpp
+    "Integers_Recreation_One\integers.cpp"
 
