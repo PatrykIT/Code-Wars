@@ -49,8 +49,16 @@ int main(int argc, char *argv[])
 #endif
 
     Bundesliga table;
-    std::vector<std::string> results = {"6:10 FC Bayern Muenchen - Werder Bremen",
-                                       "-:- Eintracht Frankfurt - Schalke 04"};
+    std::vector<std::string> results = {            "6:0 FC Bayern Muenchen - Werder Bremen",
+                                                    "1:0 Eintracht Frankfurt - Schalke 04",
+                                                    "0:2 FC Augsburg - VfL Wolfsburg",
+                                                    "1:1 Hamburger SV - FC Ingolstadt",
+                                                    "2:0 1. FC Koeln - SV Darmstadt",
+                                                    "2:1 Borussia Dortmund - FSV Mainz 05",
+                                                    "2:1 Borussia Moenchengladbach - Bayer Leverkusen",
+                                                    "-:- Hertha BSC Berlin - SC Freiburg",
+                                                    "-:- TSG 1899 Hoffenheim - RasenBall Leipzig"
+                                       };
     table.table(results);
 
     return 0;

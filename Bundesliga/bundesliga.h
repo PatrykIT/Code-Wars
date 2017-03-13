@@ -12,7 +12,11 @@ class Bundesliga
 public:
     std::string table(std::vector<std::string> results);
 
+private:
     std::vector<Club_in_Table> clubs;
+    void Sort_Table();
+    void Sort_By_Goals();
+    void Sort_By_Goals_Scored();
 };
 
 
@@ -34,6 +38,20 @@ struct Club_in_Table
         return name == this->name;
     }
 
+//    bool operator < (const int points)
+//    {
+//        return points < this->points;
+//    }
+
+    friend bool operator < (const int points, const Club_in_Table &club)
+    {
+        return points < club.points;
+    }
+
+    friend bool operator < (const Club_in_Table &club, const int points)
+    {
+        return points < club.points;
+    }
 };
 
 
