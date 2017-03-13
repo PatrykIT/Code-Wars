@@ -1,7 +1,8 @@
 #include <iostream>
 //#define BestTravel_usage
 //#define Weight_for_Weight
-#define Integers_Recreation_One
+//#define INTEGERS_RECREATION_ONE
+#define BUNDESLIGA
 
 
 #ifdef BestTravel_usage
@@ -13,8 +14,12 @@
 #include "Weight_for_Weight\Weight.cpp"
 #endif
 
-#ifdef Integers_Recreation_One
+#ifdef INTEGERS_RECREATION_ONE
 #include "Integers_Recreation_One\integers.cpp"
+#endif
+
+#ifdef BUNDESLIGA
+#include "Bundesliga\bundesliga.h"
 #endif
 
 using std::cout;
@@ -38,11 +43,15 @@ int main(int argc, char *argv[])
 
     bool bigger = std::string {"90"} < std::string {"180"}; //Check narrowing!
 
-#ifdef Integers_Recreation_One
+#ifdef INTEGERS_RECREATION_ONE
     SumSquaredDivisors object;
     std::cout << object.listSquared(1, 250) << std::endl;
 #endif
 
+    Bundesliga table;
+    std::vector<std::string> results = {"6:10 FC Bayern Muenchen - Werder Bremen",
+                                       "-:- Eintracht Frankfurt - Schalke 04"};
+    table.table(results);
 
     return 0;
 }
