@@ -63,21 +63,21 @@ std::string Bundesliga::table(std::vector<std::string> results)
 
 
             /* If both teams are non-existent. */
-            if(std::find(clubs.begin(), clubs.end(), teams_playing[0]) != clubs.end() && std::find(clubs.begin(), clubs.end(), teams_playing[1]) != clubs.end())
+            if(std::find(clubs.begin(), clubs.end(), teams_playing[0]) == clubs.end() && std::find(clubs.begin(), clubs.end(), teams_playing[1]) == clubs.end())
             {
                 Club_in_Table club_1, club_2;
                 club_1.name = teams_playing[0];
                 club_2.name = teams_playing[1];
             }
             /* If first team doesn't exist */
-            else if(std::find(clubs.begin(), clubs.end(), teams_playing[0]) != clubs.end())
+            else if(std::find(clubs.begin(), clubs.end(), teams_playing[0]) == clubs.end())
             {
                 Club_in_Table club_1;
                 club_1.name = teams_playing[0];
                 clubs.emplace_back(club_1);
             }
             /* If second team doesn't exist */
-            else if(std::find(clubs.begin(), clubs.end(), teams_playing[1]) != clubs.end())
+            else if(std::find(clubs.begin(), clubs.end(), teams_playing[1]) == clubs.end())
             {
                 Club_in_Table club_2;
                 club_2.name = teams_playing[1];
