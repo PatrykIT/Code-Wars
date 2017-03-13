@@ -148,13 +148,13 @@ void Bundesliga::Sort_Table()
 void Bundesliga::Sort_By_Goals()
 {
    /* std::set will hold all unique points that are in table */
-   std::set<int> unique_points;
+   std::set<unsigned> unique_points;
    for(const auto &club : clubs)
        unique_points.insert(club.points);
 
    while(!unique_points.empty())
    {
-       int points = *unique_points.begin();
+       unsigned points = *unique_points.begin();
        std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator> ranges;
 //       ranges = std::equal_range(clubs.begin(), clubs.begin(), points, [&](const int points, const Club_in_Table &club)
 //       { return points < club.points; } ); //Why doesn't this work when operator < is commented out? Shouldn't lambda replace it?
@@ -172,7 +172,7 @@ void Bundesliga::Sort_By_Goals()
 
 void Bundesliga::Sort_By_Goals_Scored()
 {
-   /* std::set will hold all unique points that are in table */
+   /* std::set will hold all unique goal differences that are in table */
    std::set<int> unique_goals;
    for(const auto &club : clubs)
        unique_goals.insert(club.goals_scored - club.goals_conceded);
@@ -181,10 +181,13 @@ void Bundesliga::Sort_By_Goals_Scored()
    {
        int goals = *unique_goals.begin();
        std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator> ranges;
-       ranges = std::equal_range(clubs.begin(), clubs.end(), goals);
+       ranges = std::equal_range(clubs.begin(), clubs.end(), goals); //This worked, but I think its a bug :D It compares by points.
+
+       //ranges = std::equal_range(clubs.begin(), clubs.end(), goals, [](const int goal, const Club_in_Table &club)
+       //{ return goal < (club.goals_scored - club.goals_conceded); } );
+       //Two elements, a and b are considered equivalent if (!(a<b) && !(b<a)). I need 2 overloads for goal differences.
 
        std::sort(ranges.first, ranges.second, [](const Club_in_Table &club_1, const Club_in_Table &club_2)
-       //{ return (club_1.goals_scored - club_1.goals_conceded) > (club_2.goals_scored - club_2.goals_conceded); });
        { return club_1.goals_scored > club_2.goals_scored; });
 
         unique_goals.erase(unique_goals.begin());

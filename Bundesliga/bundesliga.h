@@ -26,7 +26,7 @@ struct Club_in_Table
 
     int matches_played = 0, matches_won = 0, matches_drawn = 0, matches_lost = 0;
     int goals_scored = 0, goals_conceded = 0;
-    int points = 0;
+    unsigned points = 0;
 
     bool operator==(const Club_in_Table &club)
     {
@@ -43,14 +43,24 @@ struct Club_in_Table
 //        return points < this->points;
 //    }
 
-    friend bool operator < (const int points, const Club_in_Table &club)
+    friend bool operator < (const unsigned points, const Club_in_Table &club)
     {
         return points < club.points;
     }
 
-    friend bool operator < (const Club_in_Table &club, const int points)
+    friend bool operator < (const Club_in_Table &club, const unsigned points)
     {
         return points < club.points;
+    }
+
+    friend bool operator < (const int goals, const Club_in_Table &club)
+    {
+        return goals < club.goals_scored;
+    }
+
+    friend bool operator < (const Club_in_Table &club, const int goals)
+    {
+        return goals < club.goals_scored;
     }
 };
 
