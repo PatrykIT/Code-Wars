@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
                                                     "2:0 1. FC Koeln - SV Darmstadt",
                                                     "2:1 Borussia Dortmund - FSV Mainz 05",
                                                     "2:1 Borussia Moenchengladbach - Bayer Leverkusen",
-                                                    "-:- Hertha BSC Berlin - SC Freiburg",
+                                                    "2:0 AAertha BSC Berlin - SC Freiburg",
                                                     "-:- TSG 1899 Hoffenheim - RasenBall Leipzig"
                                        };
     table.table(results);

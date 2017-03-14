@@ -17,6 +17,9 @@ private:
     void Sort_Table();
     void Sort_By_Goals();
     void Sort_By_Goals_Scored();
+    void Sort_By_Name();
+    bool Check_if_Identical(const Club_in_Table &club_1, const Club_in_Table &club_2);
+
 };
 
 
@@ -38,11 +41,9 @@ struct Club_in_Table
         return name == this->name;
     }
 
-//    bool operator < (const int points)
-//    {
-//        return points < this->points;
-//    }
 
+    /* std::equal range needs 2 overloads:
+     * Two elements, a and b are considered equivalent if (!(a<b) && !(b<a)) */
     friend bool operator < (const unsigned points, const Club_in_Table &club)
     {
         return points < club.points;
@@ -53,6 +54,7 @@ struct Club_in_Table
         return points < club.points;
     }
 
+    /* Friend function is like static function; it cannot access member variables. */
     friend bool operator < (const int goals, const Club_in_Table &club)
     {
         return goals < club.goals_scored;
@@ -62,8 +64,20 @@ struct Club_in_Table
     {
         return goals < club.goals_scored;
     }
+
+    friend bool operator < (const Club_in_Table &club_1, const Club_in_Table &club_2)
+    {
+        return club_1.name > club_2.name;
+    }
+
 };
 
-
+struct Name_Comparator
+{
+    static bool Compare(const Club_in_Table &club_1, const Club_in_Table &club_2)
+    {
+        return club_1.name > club_2.name;
+    }
+};
 
 #endif // BUNDESLIGA_H
