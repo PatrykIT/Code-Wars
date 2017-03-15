@@ -141,7 +141,7 @@ void Bundesliga::Sort_Table()
 
     for(auto &club : clubs)
          std::cout << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
-                     club.goals_conceded << "\n";
+                     club.goals_conceded << "\n"; std::cout << "\n";
 
     Sort_By_Name();
 
@@ -150,7 +150,7 @@ void Bundesliga::Sort_Table()
 
     for(auto &club : clubs)
          std::cout << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
-                     club.goals_conceded << "\n";
+                     club.goals_conceded << "\n"; std::cout << "\n";
 }
 
 
@@ -196,10 +196,8 @@ void Bundesliga::Sort_By_Goals_Scored()
        int goals = *unique_points.begin();
        std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator> ranges;
        ranges = std::equal_range(clubs.begin(), clubs.end(), goals);
-
        //ranges = std::equal_range(clubs.begin(), clubs.end(), goals, [](const int goal, const Club_in_Table &club)
        //{ return goal < (club.goals_scored - club.goals_conceded); } );
-       //Two elements, a and b are considered equivalent if (!(a<b) && !(b<a)). I need 2 overloads for goal differences.
 
        std::sort(ranges.first, ranges.second, [](const Club_in_Table &club_1, const Club_in_Table &club_2)
        { return club_1.goals_scored > club_2.goals_scored; });
@@ -239,6 +237,7 @@ void Bundesliga::Sort_By_Name()
             indexes.at(current_vector).push_back(index_1);
             indexes.at(current_vector).push_back(index_2);
             std::cout << "Identical: " << club_iter->name << " & " << (*(club_iter +1)).name << "\n";
+            std::cout << "Addresses of pointet elements: " << &(*club_iter) << " & " << &(*(club_iter +1)) << "\n";
         }
         else //Means we moved on to the next group of teams
         {
@@ -265,7 +264,7 @@ void Bundesliga::Sort_By_Name()
     for(std::vector<size_t> current_vec : indexes)
     {
         /* Convert indexes to iterators. */
-        size_t lowest_index = current_vec.front();
+        size_t lowest_index = current_vec.front(); //If I save here all, then std::sort would probably work.
         size_t biggest_index = current_vec.back();
 
         /* We only need to save low and upper range of iterators. std::sort will use them, and sort all elements in between them also :) */
@@ -281,13 +280,13 @@ void Bundesliga::Sort_By_Name()
     iterators.erase(iterators.begin() + current_vector, iterators.end());
 
     /* Sort elements by names. I would do it like this: For every vector with iterators, sort those elements. */
-    for(std::vector<std::vector<Club_in_Table>::iterator> iter : iterators)
+    for(std::vector<std::vector<Club_in_Table>::iterator> &iter : iterators)
     {
         //std::cout << iter.at(0)->name << "\n";
         //std::cout << "Distance: " <<std::distance(iter.begin(), iter.end()) ;
         //std::cout << iter.at(std::distance(iter.begin(), iter.end()) -1)->name;
 
-        for(std::vector<std::vector<Club_in_Table>::iterator>::iterator temp = iter.begin(); temp != iter.end(); ++temp)
+        for(std::vector<std::vector<Club_in_Table>::iterator>::iterator temp = iter.begin(); temp != iter.end(); ++temp) //I think this iteration shouldnt be done with vector, but just iterator to Club
             std::cout << "Before sort: " << (*temp)->name << "\n";
 
         std::sort(iter.at(0), iter.at(std::distance(iter.begin(), iter.end()) -1));
