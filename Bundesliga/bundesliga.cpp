@@ -222,8 +222,7 @@ void Bundesliga::Sort_By_Name()
     //So now I need to mark teams that have in common: points, difference of goals, goals scored (So actually all of these 3 must be the same)
     //We know that clubs are already sorted how they should be. We should only compare clubs that have identical [points, difference goals, goals scored].
 
-    //9 vectors. Each vector holds a group of indexes.
-    std::vector<std::vector<size_t>> indexes (18);
+    std::vector<std::set<size_t>> indexes (18);
     int current_vector = 0;
 
     for(std::vector<Club_in_Table>::iterator club_iter = clubs.begin(); club_iter != clubs.end() -1; ++club_iter)
@@ -234,10 +233,10 @@ void Bundesliga::Sort_By_Name()
             size_t index_1 = std::distance(clubs.begin(), club_iter);
             size_t index_2 = std::distance(clubs.begin(), club_iter+1);
 
-            indexes.at(current_vector).push_back(index_1);
-            indexes.at(current_vector).push_back(index_2);
-            std::cout << "Identical: " << club_iter->name << " & " << (*(club_iter +1)).name << "\n";
-            std::cout << "Addresses of pointet elements: " << &(*club_iter) << " & " << &(*(club_iter +1)) << "\n";
+            indexes.at(current_vector).emplace(index_1);
+            indexes.at(current_vector).emplace(index_2);
+            //std::cout << "Identical: " << club_iter->name << " & " << (*(club_iter +1)).name << "\n";
+            //std::cout << "Addresses of pointet elements: " << &(*club_iter) << " & " << &(*(club_iter +1)) << "\n";
         }
         else //Means we moved on to the next group of teams
         {
@@ -247,7 +246,7 @@ void Bundesliga::Sort_By_Name()
     }
 
     /* Remove empty spaces from vector */
-    for(std::vector<std::vector<size_t>>::iterator it = indexes.begin(); it != indexes.end(); ++it)
+    for(std::vector<std::set<size_t>>::iterator it = indexes.begin(); it != indexes.end(); ++it)
     {
         if(it->empty())
         {
@@ -261,18 +260,15 @@ void Bundesliga::Sort_By_Name()
     current_vector = 0;
 
     /* Now I should have vector, that has vectors. Each of those vectors holds indexes to the group of same teams, that needs to be sorted by name. */
-    for(std::vector<size_t> current_vec : indexes)
+    for(std::set<size_t> current_vec : indexes)
     {
         /* Convert indexes to iterators. */
-        size_t lowest_index = current_vec.front(); //If I save here all, then std::sort would probably work.
-        size_t biggest_index = current_vec.back();
+        for(size_t index : current_vec)
+        {
+            std::vector<Club_in_Table>::iterator current_iter = clubs.begin() + index;
+            iterators.at(current_vector).push_back(current_iter);
+        }
 
-        /* We only need to save low and upper range of iterators. std::sort will use them, and sort all elements in between them also :) */
-        std::vector<Club_in_Table>::iterator low_range = clubs.begin() + lowest_index;
-        std::vector<Club_in_Table>::iterator high_range = clubs.begin() + biggest_index;
-
-        iterators.at(current_vector).push_back(low_range);
-        iterators.at(current_vector).push_back(high_range);
         ++current_vector;
     }
 
@@ -282,15 +278,13 @@ void Bundesliga::Sort_By_Name()
     /* Sort elements by names. I would do it like this: For every vector with iterators, sort those elements. */
     for(std::vector<std::vector<Club_in_Table>::iterator> &iter : iterators)
     {
-        //std::cout << iter.at(0)->name << "\n";
-        //std::cout << "Distance: " <<std::distance(iter.begin(), iter.end()) ;
         //std::cout << iter.at(std::distance(iter.begin(), iter.end()) -1)->name;
 
         for(std::vector<std::vector<Club_in_Table>::iterator>::iterator temp = iter.begin(); temp != iter.end(); ++temp) //I think this iteration shouldnt be done with vector, but just iterator to Club
             std::cout << "Before sort: " << (*temp)->name << "\n";
 
-        std::sort(iter.at(0), iter.at(std::distance(iter.begin(), iter.end()) -1));
-        //std::sort(iter.at(0), iter.at(std::distance(iter.begin(), iter.end()) -1), Name_Comparator::Compare);
+        std::sort(iter.begin(), iter.end()); //Here I would need a function that dereferences iterator.
+
 
         for(std::vector<std::vector<Club_in_Table>::iterator>::iterator temp = iter.begin(); temp != iter.end(); ++temp)
             std::cout << "After sort: " << (*temp)->name << "\n";

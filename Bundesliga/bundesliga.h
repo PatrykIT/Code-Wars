@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <initializer_list>
+#include <iostream>
 
 struct Club_in_Table;
 
@@ -67,7 +68,15 @@ struct Club_in_Table
 
     friend bool operator < (const Club_in_Table &club_1, const Club_in_Table &club_2)
     {
-        return club_1.name > club_2.name;
+        std::cout << "Comparing: " << club_1.name << " & " << club_2.name << "\n";
+        return club_1.name < club_2.name;
+    }
+
+    friend bool operator < (const std::vector<Club_in_Table>::iterator &club_1,
+                            const std::vector<Club_in_Table>::iterator &club_2)
+    {
+        std::cout << "Comparing: " << (*club_1).name << " & " << club_2->name << "\n";
+        return club_1->name < club_2->name;
     }
 
 };
@@ -76,6 +85,7 @@ struct Name_Comparator
 {
     static bool Compare(const Club_in_Table &club_1, const Club_in_Table &club_2)
     {
+
         return club_1.name > club_2.name;
     }
 };
