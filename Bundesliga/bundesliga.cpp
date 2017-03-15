@@ -136,18 +136,31 @@ void Bundesliga::Sort_Table()
     std::sort(clubs.begin(), clubs.end(), [](const Club_in_Table &club_1, const Club_in_Table &club_2)
     { return club_1.points > club_2.points; } );
 
+    std::cout << "SORTED BY POINTS:\n";
+    for(auto &club : clubs)
+         std::cout << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
+                     club.goals_conceded << "\n"; std::cout << "\n\n";
+
     Sort_By_Goals();
+
+    std::cout << "SORTED BY GOALS:\n";
+    for(auto &club : clubs)
+         std::cout << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
+                     club.goals_conceded << "\n"; std::cout << "\n\n";
+
+    std::cout << "SORTED BY SCORED GOALS:\n";
     Sort_By_Goals_Scored();
 
     for(auto &club : clubs)
          std::cout << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
-                     club.goals_conceded << "\n"; std::cout << "\n";
+                     club.goals_conceded << "\n"; std::cout << "\n\n";
 
     Sort_By_Name();
 
     //4. Otherwise: The teams share the same place, but ordered by the name of the team (case-insensitive).
     //So now I need to mark teams that have in common: points, difference of goals, goals scored (So actually all of these 3 must be the same)
 
+    std::cout << "FINAL TABLE: \n\n";
     for(auto &club : clubs)
          std::cout << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
                      club.goals_conceded << "\n"; std::cout << "\n";
@@ -166,8 +179,6 @@ void Bundesliga::Sort_By_Goals()
    {
        unsigned points = *unique_points.begin();
        std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator> ranges;
-//       ranges = std::equal_range(clubs.begin(), clubs.begin(), points, [&](const int points, const Club_in_Table &club)
-//       { return points < club.points; } ); //Why doesn't this work when operator < is commented out? Shouldn't lambda replace it?
        ranges = std::equal_range(clubs.begin(), clubs.end(), points);
 
        std::sort(ranges.first, ranges.second, [](const Club_in_Table &club_1, const Club_in_Table &club_2)
@@ -178,31 +189,28 @@ void Bundesliga::Sort_By_Goals()
 }
 
 
-
-
 void Bundesliga::Sort_By_Goals_Scored()
 {
-   /* std::set will hold all unique goal differences that are in table */
-//   std::set<int> unique_goals;
-//   for(const auto &club : clubs)
-//       unique_goals.insert(club.goals_scored - club.goals_conceded);
-
-    std::set<unsigned> unique_points;
+   /* std::set will hold all clubs with unique points */
+    std::set<Club_in_Table, Comparator_For_Set> unique_clubs;
     for(const auto &club : clubs)
-        unique_points.insert(club.points);
+    {
+        Club_in_Table tmp;
+        tmp.points = club.points;
+        tmp.goals_scored = club.goals_scored;
+        tmp.goals_conceded = club.goals_conceded;
+    }
 
-   while(!unique_points.empty())
+   while(!unique_clubs.empty())
    {
-       int goals = *unique_points.begin();
+       Club_in_Table club = *unique_clubs.begin();
        std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator> ranges;
-       ranges = std::equal_range(clubs.begin(), clubs.end(), goals);
-       //ranges = std::equal_range(clubs.begin(), clubs.end(), goals, [](const int goal, const Club_in_Table &club)
-       //{ return goal < (club.goals_scored - club.goals_conceded); } );
+       ranges = std::equal_range(clubs.begin(), clubs.end(), club, Club_in_Table::Comparator_For_Range);
 
        std::sort(ranges.first, ranges.second, [](const Club_in_Table &club_1, const Club_in_Table &club_2)
-       { return club_1.goals_scored > club_2.goals_scored; });
+       { return club_1.goals_scored < club_2.goals_scored; });
 
-        unique_points.erase(unique_points.begin());
+        unique_clubs.erase(unique_clubs.begin());
    }
 }
 
@@ -217,37 +225,36 @@ bool Bundesliga::Check_if_Identical(const Club_in_Table &club_1, const Club_in_T
 
 
 //Alternative: std::find_if. Maybe I wouldn't need to save iterators manually.
+//This function (not find_if): Why do I convert iterators to indexes if later do I convert it back to original?
+//This can be merged!
 void Bundesliga::Sort_By_Name()
 {
     //So now I need to mark teams that have in common: points, difference of goals, goals scored (So actually all of these 3 must be the same)
     //We know that clubs are already sorted how they should be. We should only compare clubs that have identical [points, difference goals, goals scored].
 
-    //9 vectors. Each vector holds a group of indexes.
-    std::vector<std::vector<size_t>> indexes (18);
-    int current_vector = 0;
+    std::vector<std::set<size_t>> indexes (18);
+    int current_set = 0;
 
+    /* CONVERT ITERATORS OF CLUBS THAT HAVE THE SAME [POINTS, GOALS SCORED, GOALS DIFFERENCE] TO INDEXES */
     for(std::vector<Club_in_Table>::iterator club_iter = clubs.begin(); club_iter != clubs.end() -1; ++club_iter)
     {
         /* Save indexes of teams that are identical. Later, those indexes will be sorted by name. */
         if(Check_if_Identical(*club_iter, *(club_iter +1)) == true)
         {
             size_t index_1 = std::distance(clubs.begin(), club_iter);
-            size_t index_2 = std::distance(clubs.begin(), club_iter+1);
+            size_t index_2 = std::distance(clubs.begin(), club_iter +1);
 
-            indexes.at(current_vector).push_back(index_1);
-            indexes.at(current_vector).push_back(index_2);
-            std::cout << "Identical: " << club_iter->name << " & " << (*(club_iter +1)).name << "\n";
-            std::cout << "Addresses of pointet elements: " << &(*club_iter) << " & " << &(*(club_iter +1)) << "\n";
+            indexes.at(current_set).emplace(index_1);
+            indexes.at(current_set).emplace(index_2);
         }
         else //Means we moved on to the next group of teams
         {
-            current_vector++;
-            std::cout << "---------\n";
+            current_set++;
         }
     }
 
-    /* Remove empty spaces from vector */
-    for(std::vector<std::vector<size_t>>::iterator it = indexes.begin(); it != indexes.end(); ++it)
+    /* REMOVE EMPTY SETS */
+    for(std::vector<std::set<size_t>>::iterator it = indexes.begin(); it != indexes.end(); ++it)
     {
         if(it->empty())
         {
@@ -256,46 +263,55 @@ void Bundesliga::Sort_By_Name()
         }
     }
 
-    /* Vector of iterators ;D */
+    /* Vector of iterators */
     std::vector<std::vector<std::vector<Club_in_Table>::iterator>> iterators (18);
-    current_vector = 0;
+    int current_vector = 0;
 
     /* Now I should have vector, that has vectors. Each of those vectors holds indexes to the group of same teams, that needs to be sorted by name. */
-    for(std::vector<size_t> current_vec : indexes)
+    /* CONVERT INDEXES TO ITERATORS */
+    for(std::set<size_t> current_vec : indexes)
     {
         /* Convert indexes to iterators. */
-        size_t lowest_index = current_vec.front(); //If I save here all, then std::sort would probably work.
-        size_t biggest_index = current_vec.back();
+        for(size_t index : current_vec)
+        {
+            std::vector<Club_in_Table>::iterator current_iter = clubs.begin() + index;
+            iterators.at(current_vector).push_back(current_iter);
+        }
 
-        /* We only need to save low and upper range of iterators. std::sort will use them, and sort all elements in between them also :) */
-        std::vector<Club_in_Table>::iterator low_range = clubs.begin() + lowest_index;
-        std::vector<Club_in_Table>::iterator high_range = clubs.begin() + biggest_index;
-
-        iterators.at(current_vector).push_back(low_range);
-        iterators.at(current_vector).push_back(high_range);
         ++current_vector;
     }
 
     /* Erase the rest of vectors that were not filled. */
     iterators.erase(iterators.begin() + current_vector, iterators.end());
 
-    /* Sort elements by names. I would do it like this: For every vector with iterators, sort those elements. */
+    /* Sort elements by names. */
     for(std::vector<std::vector<Club_in_Table>::iterator> &iter : iterators)
     {
-        //std::cout << iter.at(0)->name << "\n";
-        //std::cout << "Distance: " <<std::distance(iter.begin(), iter.end()) ;
-        //std::cout << iter.at(std::distance(iter.begin(), iter.end()) -1)->name;
-
-        for(std::vector<std::vector<Club_in_Table>::iterator>::iterator temp = iter.begin(); temp != iter.end(); ++temp) //I think this iteration shouldnt be done with vector, but just iterator to Club
-            std::cout << "Before sort: " << (*temp)->name << "\n";
-
-        std::sort(iter.at(0), iter.at(std::distance(iter.begin(), iter.end()) -1));
-        //std::sort(iter.at(0), iter.at(std::distance(iter.begin(), iter.end()) -1), Name_Comparator::Compare);
-
-        for(std::vector<std::vector<Club_in_Table>::iterator>::iterator temp = iter.begin(); temp != iter.end(); ++temp)
-            std::cout << "After sort: " << (*temp)->name << "\n";
+        std::sort(iter.begin(), iter.end(), Club_in_Table::Iterator_Based_Comparator_for_Names);
     }
 
+
+    std::vector<Club_in_Table> final_table;
+    for(std::vector<std::vector<Club_in_Table>::iterator> &iter : iterators)
+    {
+        for(auto temp : iter)
+            final_table.push_back(*temp);
+    }
+
+    /* For every element in "clubs": If element is not in "final_table", insert him, with position that he had in original
+     * vector.  */
+    for(auto iter = clubs.begin(); iter != clubs.end(); ++iter)
+    {
+        std::vector<Club_in_Table>::iterator position = std::find(final_table.begin(), final_table.end(), *iter);
+        /* Means club is not in final table - we need to put it, with appriopriate position */
+        if(position == final_table.end())
+        {
+            size_t index = std::distance(clubs.begin(), iter);
+            final_table.insert(final_table.begin() + index, *iter);
+        }
+    }
+
+    clubs = final_table;
 }
 
 
