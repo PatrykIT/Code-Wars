@@ -94,14 +94,4 @@ struct Comparator_For_Set
     }
 };
 
-
-struct Name_Comparator
-{
-    static bool Compare(const Club_in_Table &club_1, const Club_in_Table &club_2)
-    {
-
-        return club_1.name > club_2.name;
-    }
-};
-
 #endif // BUNDESLIGA_H

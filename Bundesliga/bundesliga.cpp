@@ -211,21 +211,7 @@ void Bundesliga::Sort_By_Goals()
 
 void Bundesliga::Sort_By_Goals_Scored()
 {
-   /* std::set will hold all unique goal differences that are in table */
-//   std::set<int> unique_goals;
-//   for(const auto &club : clubs)
-//       unique_goals.insert(club.goals_scored - club.goals_conceded);
-
-//    club_points_goals temporary;
-//    std::set<club_points_goals> unique_goals; //Change this to normal Club In Table.
-//    for(const auto &club : clubs)
-//    {
-//        temporary.points = club.points;
-//        temporary.goal_difference = club.goals_scored - club.goals_conceded;
-//        unique_goals.insert(temporary);
-//    }
-
-
+   /* std::set will hold all clubs with unique points */
     std::set<Club_in_Table, Comparator_For_Set> unique_clubs;
     for(const auto &club : clubs)
     {
@@ -283,13 +269,10 @@ void Bundesliga::Sort_By_Name()
 
             indexes.at(current_set).emplace(index_1);
             indexes.at(current_set).emplace(index_2);
-            //std::cout << "Identical: " << club_iter->name << " & " << (*(club_iter +1)).name << "\n";
-            //std::cout << "Addresses of pointet elements: " << &(*club_iter) << " & " << &(*(club_iter +1)) << "\n";
         }
         else //Means we moved on to the next group of teams
         {
             current_set++;
-            std::cout << "---------\n";
         }
     }
 
@@ -326,15 +309,7 @@ void Bundesliga::Sort_By_Name()
     /* Sort elements by names. I would do it like this: For every vector with iterators, sort those elements. */
     for(std::vector<std::vector<Club_in_Table>::iterator> &iter : iterators)
     {
-        //for(std::vector<std::vector<Club_in_Table>::iterator>::iterator temp = iter.begin(); temp != iter.end(); ++temp) //I think this iteration shouldnt be done with vector, but just iterator to Club
-            //std::cout << "Before sort: " << (*temp)->name << "\n";
-
-        //std::sort(iter.at(0), iter.at(std::distance(iter.begin(), iter.end()) -1));
-        std::sort(iter.begin(), iter.end()); //Here I would need a function that dereferences iterator.
-
-
-        //for(std::vector<std::vector<Club_in_Table>::iterator>::iterator temp = iter.begin(); temp != iter.end(); ++temp)
-            //std::cout << "After sort: " << (*temp)->name << "\n";
+        std::sort(iter.begin(), iter.end());
     }
 
 
@@ -359,20 +334,6 @@ void Bundesliga::Sort_By_Name()
     }
 
     clubs = final_table;
-
-
-    /* It looks like I sort iterators in vector. */
-//    for(std::vector<std::vector<Club_in_Table>::iterator> &iter : iterators) //Here is good sort.
-//    {
-//        for(auto temp : iter)
-//        std::cout << temp->name << "\n";
-//    }
-
-//    std::cout << "\tCLUBS:\n";
-//    for(auto &club : clubs) // Here is not sorted :/
-//        std::cout << club.name << "\n";
-
-
 }
 
 
