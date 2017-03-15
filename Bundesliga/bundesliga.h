@@ -63,7 +63,7 @@ struct Club_in_Table
 
     friend bool operator < (const Club_in_Table &club, const int goals)
     {
-        return goals < club.goals_scored;
+        return goals < club.goals_scored; //Called also when counting differences - bad!
     }
 
     friend bool operator < (const Club_in_Table &club_1, const Club_in_Table &club_2)
@@ -75,11 +75,25 @@ struct Club_in_Table
     friend bool operator < (const std::vector<Club_in_Table>::iterator &club_1,
                             const std::vector<Club_in_Table>::iterator &club_2)
     {
-        std::cout << "Comparing: " << (*club_1).name << " & " << club_2->name << "\n";
+        std::cout << "Comparing by Iterator: " << (*club_1).name << " & " << club_2->name << "\n";
         return club_1->name < club_2->name;
     }
 
+    static bool Comparator_For_Range(const Club_in_Table &club_1, const Club_in_Table &club_2)
+    {
+        return club_1.points == club_2.points &&
+       ((club_1.goals_scored - club_1.goals_conceded) == (club_2.goals_scored - club_2.goals_conceded));
+    }
 };
+
+struct Comparator_For_Set
+{
+    bool operator()(const Club_in_Table &club_1, const Club_in_Table &club_2)
+    {
+        return club_1.points < club_2.points;
+    }
+};
+
 
 struct Name_Comparator
 {
