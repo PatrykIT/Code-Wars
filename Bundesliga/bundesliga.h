@@ -72,10 +72,9 @@ struct Club_in_Table
         return club_1.name < club_2.name;
     }
 
-    friend bool operator < (const std::vector<Club_in_Table>::iterator &club_1,
+    static bool Iterator_Based_Comparator_for_Names (const std::vector<Club_in_Table>::iterator &club_1,
                             const std::vector<Club_in_Table>::iterator &club_2)
     {
-        std::cout << "Comparing by Iterator: " << (*club_1).name << " & " << club_2->name << "\n";
         return club_1->name < club_2->name;
     }
 

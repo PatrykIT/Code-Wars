@@ -136,6 +136,11 @@ void Bundesliga::Sort_Table()
     std::sort(clubs.begin(), clubs.end(), [](const Club_in_Table &club_1, const Club_in_Table &club_2)
     { return club_1.points > club_2.points; } );
 
+    std::cout << "SORTED BY POINTS:\n";
+    for(auto &club : clubs)
+         std::cout << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
+                     club.goals_conceded << "\n"; std::cout << "\n\n";
+
     Sort_By_Goals();
 
     std::cout << "SORTED BY GOALS:\n";
@@ -184,31 +189,6 @@ void Bundesliga::Sort_By_Goals()
 }
 
 
-
-
-//struct club_points_goals
-//{
-//    unsigned points;
-//    int goal_difference;
-
-//    friend bool operator == (club_points_goals club_1, const Club_in_Table &club_2)
-//    {
-//        return club_1.points == club_2.points && club_1.goal_difference == club_2.goals_scored - club_2.goals_conceded;
-//    }
-
-//    static Comparator (const club_points_goals &club_1, const Club_in_Table &club_2)
-//    {
-//        return club_1.points == club_2.points && club_1.goal_difference == club_2.goals_scored - club_2.goals_conceded;
-//    }
-
-
-//   friend bool operator < (const club_points_goals &club_1, const club_points_goals &club_2)
-//   {
-//       return club_1.points < club_2.points;
-//   }
-//};
-
-
 void Bundesliga::Sort_By_Goals_Scored()
 {
    /* std::set will hold all clubs with unique points */
@@ -221,20 +201,14 @@ void Bundesliga::Sort_By_Goals_Scored()
         tmp.goals_conceded = club.goals_conceded;
     }
 
-    //The bug is that I group clubs with same points, but I should also group with same goal difference.
-    //Then only I can sort by goals scored
-
    while(!unique_clubs.empty())
    {
        Club_in_Table club = *unique_clubs.begin();
        std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator> ranges;
        ranges = std::equal_range(clubs.begin(), clubs.end(), club, Club_in_Table::Comparator_For_Range);
 
-       //ranges = std::equal_range(clubs.begin(), clubs.end(), goals, [](const int goal, const Club_in_Table &club)
-       //{ return goal < (club.goals_scored - club.goals_conceded); } );
-
        std::sort(ranges.first, ranges.second, [](const Club_in_Table &club_1, const Club_in_Table &club_2)
-       { return club_1.goals_scored > club_2.goals_scored; });
+       { return club_1.goals_scored < club_2.goals_scored; });
 
         unique_clubs.erase(unique_clubs.begin());
    }
@@ -251,6 +225,8 @@ bool Bundesliga::Check_if_Identical(const Club_in_Table &club_1, const Club_in_T
 
 
 //Alternative: std::find_if. Maybe I wouldn't need to save iterators manually.
+//This function (not find_if): Why do I convert iterators to indexes if later do I convert it back to original?
+//This can be merged!
 void Bundesliga::Sort_By_Name()
 {
     //So now I need to mark teams that have in common: points, difference of goals, goals scored (So actually all of these 3 must be the same)
@@ -259,6 +235,7 @@ void Bundesliga::Sort_By_Name()
     std::vector<std::set<size_t>> indexes (18);
     int current_set = 0;
 
+    /* CONVERT ITERATORS OF CLUBS THAT HAVE THE SAME [POINTS, GOALS SCORED, GOALS DIFFERENCE] TO INDEXES */
     for(std::vector<Club_in_Table>::iterator club_iter = clubs.begin(); club_iter != clubs.end() -1; ++club_iter)
     {
         /* Save indexes of teams that are identical. Later, those indexes will be sorted by name. */
@@ -276,7 +253,7 @@ void Bundesliga::Sort_By_Name()
         }
     }
 
-    /* Remove empty spaces from vector */
+    /* REMOVE EMPTY SETS */
     for(std::vector<std::set<size_t>>::iterator it = indexes.begin(); it != indexes.end(); ++it)
     {
         if(it->empty())
@@ -286,11 +263,12 @@ void Bundesliga::Sort_By_Name()
         }
     }
 
-    /* Vector of iterators ;D */
+    /* Vector of iterators */
     std::vector<std::vector<std::vector<Club_in_Table>::iterator>> iterators (18);
     int current_vector = 0;
 
     /* Now I should have vector, that has vectors. Each of those vectors holds indexes to the group of same teams, that needs to be sorted by name. */
+    /* CONVERT INDEXES TO ITERATORS */
     for(std::set<size_t> current_vec : indexes)
     {
         /* Convert indexes to iterators. */
@@ -306,18 +284,18 @@ void Bundesliga::Sort_By_Name()
     /* Erase the rest of vectors that were not filled. */
     iterators.erase(iterators.begin() + current_vector, iterators.end());
 
-    /* Sort elements by names. I would do it like this: For every vector with iterators, sort those elements. */
+    /* Sort elements by names. */
     for(std::vector<std::vector<Club_in_Table>::iterator> &iter : iterators)
     {
-        std::sort(iter.begin(), iter.end());
+        std::sort(iter.begin(), iter.end(), Club_in_Table::Iterator_Based_Comparator_for_Names);
     }
 
 
     std::vector<Club_in_Table> final_table;
-    for(std::vector<std::vector<Club_in_Table>::iterator> &iter : iterators) //Here is good sort.
+    for(std::vector<std::vector<Club_in_Table>::iterator> &iter : iterators)
     {
         for(auto temp : iter)
-        final_table.push_back(*temp);
+            final_table.push_back(*temp);
     }
 
     /* For every element in "clubs": If element is not in "final_table", insert him, with position that he had in original
