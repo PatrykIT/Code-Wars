@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <set>
 #include <typeinfo>
+#include <functional>
 
 
 using std::cout;
@@ -20,6 +21,10 @@ std::string Bundesliga::table(std::vector<std::string> results)
 
     std::string token;
 
+    std::vector<int> numbers { 10, 10, 20, 30, 40 };
+    std::pair<std::vector<int>::iterator, std::vector<int>::iterator> range;
+    range = std::equal_range(numbers.begin(), numbers.end(), 10);
+    //std::cout << "Begin: " << &*range.first << "\nEnd: " << &*range.second << "\n";
 
 
     for(auto match = results.begin(); match != results.end(); ++match)
@@ -149,13 +154,13 @@ void Bundesliga::Sort_Table()
                      club.goals_conceded << "\n"; std::cout << "\n\n";
 
     std::cout << "SORTED BY SCORED GOALS:\n";
-    Sort_By_Goals_Scored();
+    //Sort_By_Goals_Scored();
 
     for(auto &club : clubs)
          std::cout << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
                      club.goals_conceded << "\n"; std::cout << "\n\n";
 
-    Sort_By_Name();
+    //Sort_By_Name();
 
     //4. Otherwise: The teams share the same place, but ordered by the name of the team (case-insensitive).
     //So now I need to mark teams that have in common: points, difference of goals, goals scored (So actually all of these 3 must be the same)
@@ -165,7 +170,6 @@ void Bundesliga::Sort_Table()
          std::cout << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
                      club.goals_conceded << "\n"; std::cout << "\n";
 }
-
 
 
 void Bundesliga::Sort_By_Goals()
@@ -179,7 +183,19 @@ void Bundesliga::Sort_By_Goals()
    {
        unsigned points = *unique_points.begin();
        std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator> ranges;
-       ranges = std::equal_range(clubs.begin(), clubs.end(), points);
+
+       std::vector<Club_in_Table>::iterator first_iter;
+       std::vector<Club_in_Table>::iterator last_iter;
+
+       first_iter = std::find_if(clubs.begin(), clubs.end(), [points](const Club_in_Table &club) { return club.points == points; } );
+       for(auto iter = clubs.begin(); iter != clubs.end(); ++iter)
+       {
+           if(iter->points == points)
+               last_iter = iter;
+       }
+
+       ranges.first = first_iter;
+       ranges.second = last_iter +1; //+1 because all algorithms use [first, last).
 
        std::sort(ranges.first, ranges.second, [](const Club_in_Table &club_1, const Club_in_Table &club_2)
        { return (club_1.goals_scored - club_1.goals_conceded) > (club_2.goals_scored - club_2.goals_conceded); });
@@ -189,7 +205,30 @@ void Bundesliga::Sort_By_Goals()
 }
 
 
-void Bundesliga::Sort_By_Goals_Scored()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void Bundesliga::Sort_By_Goals_Scored() //This doesn't work properly.
 {
    /* std::set will hold all clubs with unique points */
     std::set<Club_in_Table, Comparator_For_Set> unique_clubs;
@@ -199,6 +238,7 @@ void Bundesliga::Sort_By_Goals_Scored()
         tmp.points = club.points;
         tmp.goals_scored = club.goals_scored;
         tmp.goals_conceded = club.goals_conceded;
+        unique_clubs.insert(tmp);
     }
 
    while(!unique_clubs.empty())
