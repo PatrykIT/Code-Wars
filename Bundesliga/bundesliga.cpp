@@ -12,6 +12,18 @@ using std::cout;
 
 using std::endl;
 
+void Bundesliga::Print_Clubs()
+{
+    int index = 0;
+    for(auto &club : clubs)
+    {
+         std::cout << index << ". " << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
+                     club.goals_conceded << "\n";
+         ++index;
+    }
+    std::cout << "\n\n";
+}
+
 
 std::string Bundesliga::table(std::vector<std::string> results)
 {
@@ -293,26 +305,37 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
             for(auto iter = iterators.begin(); iter != iterators.end(); ++iter)
             {
                 iterators_indexes_after_sorting[index] = *iter;
+                ++index;
             }
 
             /* So now i have two maps (before sorting, after sorting). I can compare all keys and iterators. If some keys do not have same
              * iterators, that means they were sorted. So, then: Take the key of before, and see where is after key. For example if before was 2,
              * and after is 4, that means the in clubs vector i should swap (2, 4) ;) */
 
-            for(size_t counter = 0; counter != iterators_indexes_before_sorting.size(); ++counter)
+
+            /* Compare iterators. If they do not match, find matching iterator in a loop. Then, count the indexes difference and swap iterators
+             * by positions. */
+            for(size_t counter = 0; counter != iterators_indexes_before_sorting_FINAL.size(); ++counter)
             {
-                /* Compare iterators. If they do not match, find matching iterator in a loop. Then, count the indexes difference and swap iterators
-                 * by positions. */
-                if(iterators_indexes_before_sorting[counter] != iterators_indexes_after_sorting[counter])
+                /* If this is false, then that means that lhs team was sorted with some other. We need to find that other, and swap them in original container. */
+                if(iterators_indexes_before_sorting_FINAL[counter] != iterators_indexes_after_sorting[counter])
                 {
                     for(auto iter = iterators_indexes_after_sorting.begin(); iter != iterators_indexes_after_sorting.end(); ++iter)
                     {
-                        if(iterators_indexes_before_sorting[counter] == iter->second)
+                        if(iterators_indexes_before_sorting_FINAL[counter] == iter->second)
                         {
-                            int position_difference = counter - iter->first;
+                            int position_difference = iter->first - counter;
+                            std::vector<Club_in_Table>::iterator = std::find(clubs.begin(), clubs.end(), iter->second);
 
-                            std::iter_swap(clubs.begin() + std::distance(clubs.begin(), iterators_indexes_before_sorting[counter]),
-                                           clubs.begin() + std::distance(clubs.begin(), iter->second));
+
+                            std::vector<Club_in_Table>::iterator first = clubs.begin() + std::distance(clubs.begin(), iterators_indexes_before_sorting_FINAL[counter]);
+                            std::vector<Club_in_Table>::iterator second = clubs.begin() + position_difference;
+                            Club_in_Table::Swap(*first, *second);
+
+                            std::iter_swap(first,
+                                           second);
+
+                            Print_Clubs();
                             break;
                         }
                     }

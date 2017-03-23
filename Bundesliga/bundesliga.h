@@ -25,6 +25,7 @@ private:
     bool Check_if_Identical_GoalDifference(const Club_in_Table &club_1, const Club_in_Table &club_2);
     bool Check_if_Identical_Everything(const Club_in_Table &club_1, const Club_in_Table &club_2);
 
+    void Print_Clubs();
 
 };
 
@@ -47,18 +48,15 @@ struct Club_in_Table
         return name == this->name;
     }
 
+    static void Swap(Club_in_Table &lhs, Club_in_Table &other) //To do: Add function that swaps iterators in club vector.
+    {
+        std::cout << "Swapping: " << lhs.name << " with " << other.name << "\n";
+        std::swap(lhs, other);
+    }
+
 
     /* std::equal range needs 2 overloads:
      * Two elements, a and b are considered equivalent if (!(a<b) && !(b<a)) */
-//    friend bool operator < (const unsigned points, const Club_in_Table &club)
-//    {
-//        return points < club.points;
-//    }
-
-//    friend bool operator < (const Club_in_Table &club, const unsigned points)
-//    {
-//        return points < club.points;
-//    }
 
     /* Friend function is like static function; it cannot access member variables. */
     friend bool operator < (const int goals, const Club_in_Table &club)
