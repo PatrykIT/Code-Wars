@@ -1,6 +1,7 @@
 #include "bundesliga.h"
 #include <iostream>
 #include <array>
+#include <map>
 #include <algorithm>
 #include <set>
 #include <typeinfo>
@@ -229,26 +230,23 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
      * but more goals scored. */
 
     std::vector<std::vector<Club_in_Table>::iterator> iterators;
-    std::pair<size_t, size_t> range_to_correct;
-    std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator> range_to_correct_iterators;
+    std::map<size_t, std::vector<Club_in_Table>::iterator> iterators_indexes_before_sorting;
+    int index = 0;
+    std::map<size_t, std::vector<Club_in_Table>::iterator> iterators_indexes_before_sorting_FINAL;
+    int index_FINAL = 0;
 
-    bool found_first = false;
 
     for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
     {
         if(Check_if_Identical_GoalDifference(*club_iter, *(club_iter +1)) == true) //If this doesnt catch everything, write a function that compares all elements.
         {
-            if(!found_first)
-            {
-                size_t range_begin = std::distance(clubs.begin(), club_iter);
-                range_to_correct.first = range_begin;
-                range_to_correct_iterators.first = club_iter;
-                found_first = true;
-            }
-
-
             iterators.emplace_back(club_iter);
             iterators.emplace_back(club_iter +1);
+
+            iterators_indexes_before_sorting[index] = club_iter;
+            ++index;
+            iterators_indexes_before_sorting[index] = club_iter +1;
+            ++index;
         }
         /* Sort currently saved iterators and erase them, so the next ones can be saved & sorted. */
         else
@@ -261,14 +259,27 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
 
                 if(Club_in_Table::Comparator_For_Unique_Iterators(*club_1, *club_2) == true)
                 {
+                    /* Remove repeating iterator from map */
+                    for(auto iter_map = iterators_indexes_before_sorting.begin(); iter_map != iterators_indexes_before_sorting.end(); ++iter_map)
+                    {
+                        if(iter_map->second == *iter)
+                        {
+                            iterators_indexes_before_sorting.erase(iter_map->first);
+                            break;
+                        }
+                    }
                     iterators.erase(iter);
                     iter = iterators.begin();
                 }
             }
 
-            size_t range_end = std::distance(clubs.begin(), club_iter -1);
-            range_to_correct.second = range_end;
-            range_to_correct_iterators.second = club_iter -1;
+            /* Decrement indexes, because repeating iterators made them +1 bigger */
+            for(auto iter = iterators_indexes_before_sorting.begin(); iter != iterators_indexes_before_sorting.end(); ++iter)
+            {
+                iterators_indexes_before_sorting_FINAL.emplace(index_FINAL, iter->second);
+                ++index_FINAL;
+            }
+
 
             std::cout << "Before: \n";
             for(auto club : iterators) { std::cout << club->name << "\n"; }
@@ -276,19 +287,43 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
             std::sort(iterators.begin(), iterators.end(), Club_in_Table::Iterator_Based_Comparator_for_Goals_Scored); //Check if this sorts original vector too. If not, then assign original here.
             /* After sorting, I could find which elements were sorted. When I find them, I swap them in original clubs vector.
              * For example, if element 4 changed with element 2, then I can change them in original vector. */
+            std::map<size_t, std::vector<Club_in_Table>::iterator> iterators_indexes_after_sorting;
+            index = 0;
+
+            for(auto iter = iterators.begin(); iter != iterators.end(); ++iter)
+            {
+                iterators_indexes_after_sorting[index] = *iter;
+            }
+
+            /* So now i have two maps (before sorting, after sorting). I can compare all keys and iterators. If some keys do not have same
+             * iterators, that means they were sorted. So, then: Take the key of before, and see where is after key. For example if before was 2,
+             * and after is 4, that means the in clubs vector i should swap (2, 4) ;) */
+
+            for(size_t counter = 0; counter != iterators_indexes_before_sorting.size(); ++counter)
+            {
+                /* Compare iterators. If they do not match, find matching iterator in a loop. Then, count the indexes difference and swap iterators
+                 * by positions. */
+                if(iterators_indexes_before_sorting[counter] != iterators_indexes_after_sorting[counter])
+                {
+                    for(auto iter = iterators_indexes_after_sorting.begin(); iter != iterators_indexes_after_sorting.end(); ++iter)
+                    {
+                        if(iterators_indexes_before_sorting[counter] == iter->second)
+                        {
+                            int position_difference = counter - iter->first;
+
+                            std::iter_swap(clubs.begin() + std::distance(clubs.begin(), iterators_indexes_before_sorting[counter]),
+                                           clubs.begin() + std::distance(clubs.begin(), iter->second));
+                            break;
+                        }
+                    }
+                }
+            }
 
             std::cout << "After: \n";
             for(auto club : iterators) { std::cout << club->name << "\n"; }
 
 
-            /* Now when you have range saved - find it in clubs vector, erase it, at put at the same places new iteratos */
-            std::vector<Club_in_Table>::iterator pos = clubs.erase(range_to_correct_iterators.first, range_to_correct_iterators.second);
-            clubs.insert(pos, range_to_correct_iterators.first, range_to_correct_iterators.second);
-
-
-            found_first = false;
             iterators.clear();
-
         }
     }
 }
