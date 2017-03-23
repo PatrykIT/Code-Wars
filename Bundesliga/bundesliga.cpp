@@ -8,6 +8,7 @@
 
 
 using std::cout;
+
 using std::endl;
 
 
@@ -154,7 +155,7 @@ void Bundesliga::Sort_Table()
                      club.goals_conceded << "\n"; std::cout << "\n\n";
 
     std::cout << "SORTED BY SCORED GOALS:\n";
-    //Sort_By_Goals_Scored();
+    Sort_By_Goals_Scored();
 
     for(auto &club : clubs)
          std::cout << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
@@ -212,55 +213,123 @@ void Bundesliga::Sort_By_Goals()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-void Bundesliga::Sort_By_Goals_Scored() //This doesn't work properly.
+bool Bundesliga::Check_if_Identical_GoalDifference(const Club_in_Table &club_1, const Club_in_Table &club_2)
 {
-   /* std::set will hold all clubs with unique points */
-    std::set<Club_in_Table, Comparator_For_Set> unique_clubs;
-    for(const auto &club : clubs)
-    {
-        Club_in_Table tmp;
-        tmp.points = club.points;
-        tmp.goals_scored = club.goals_scored;
-        tmp.goals_conceded = club.goals_conceded;
-        unique_clubs.insert(tmp);
-    }
-
-   while(!unique_clubs.empty())
-   {
-       Club_in_Table club = *unique_clubs.begin();
-       std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator> ranges;
-       ranges = std::equal_range(clubs.begin(), clubs.end(), club, Club_in_Table::Comparator_For_Range);
-
-       std::sort(ranges.first, ranges.second, [](const Club_in_Table &club_1, const Club_in_Table &club_2)
-       { return club_1.goals_scored < club_2.goals_scored; });
-
-        unique_clubs.erase(unique_clubs.begin());
-   }
+    int goal_difference_club_1 = club_1.goals_scored - club_1.goals_conceded;
+    int goal_difference_club_2 = club_2.goals_scored - club_2.goals_conceded;
+    return (club_1.points == club_2.points && goal_difference_club_1 == goal_difference_club_2);
 }
 
 
 
-bool Bundesliga::Check_if_Identical(const Club_in_Table &club_1, const Club_in_Table &club_2)
+
+void Bundesliga::Sort_By_Goals_Scored_Helper()
 {
-    int goal_difference_club_1 = club_1.goals_scored - club_1.goals_conceded;
-    int goal_difference_club_2 = club_2.goals_scored - club_2.goals_conceded;
-    return (club_1.points == club_2.points && goal_difference_club_1 == goal_difference_club_2 && club_1.goals_scored == club_2.goals_scored);
+    /* We know that teams will be already grouped by points and goal difference. Now I need to sort clubs that have the same goal difference,
+     * but more goals scored. */
+
+    std::vector<std::vector<Club_in_Table>::iterator> iterators;
+    std::pair<size_t, size_t> range_to_correct;
+    std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator> range_to_correct_iterators;
+
+    bool found_first = false;
+
+    for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
+    {
+        if(Check_if_Identical_GoalDifference(*club_iter, *(club_iter +1)) == true) //If this doesnt catch everything, write a function that compares all elements.
+        {
+            if(!found_first)
+            {
+                size_t range_begin = std::distance(clubs.begin(), club_iter);
+                range_to_correct.first = range_begin;
+                range_to_correct_iterators.first = club_iter;
+                found_first = true;
+            }
+
+
+            iterators.emplace_back(club_iter);
+            iterators.emplace_back(club_iter +1);
+        }
+        /* Sort currently saved iterators and erase them, so the next ones can be saved & sorted. */
+        else
+        {
+            /* Remove repeating iterators */
+            for(auto iter = iterators.begin(); iter != iterators.end() -1; ++iter)
+            {
+                Club_in_Table *club_1 = &(**iter);
+                Club_in_Table *club_2 = &(**(iter +1));
+
+                if(Club_in_Table::Comparator_For_Unique_Iterators(*club_1, *club_2) == true)
+                {
+                    iterators.erase(iter);
+                    iter = iterators.begin();
+                }
+            }
+
+            size_t range_end = std::distance(clubs.begin(), club_iter -1);
+            range_to_correct.second = range_end;
+            range_to_correct_iterators.second = club_iter -1;
+
+            std::cout << "Before: \n";
+            for(auto club : iterators) { std::cout << club->name << "\n"; }
+
+            std::sort(iterators.begin(), iterators.end(), Club_in_Table::Iterator_Based_Comparator_for_Goals_Scored); //Check if this sorts original vector too. If not, then assign original here.
+            /* After sorting, I could find which elements were sorted. When I find them, I swap them in original clubs vector.
+             * For example, if element 4 changed with element 2, then I can change them in original vector. */
+
+            std::cout << "After: \n";
+            for(auto club : iterators) { std::cout << club->name << "\n"; }
+
+
+            /* Now when you have range saved - find it in clubs vector, erase it, at put at the same places new iteratos */
+            std::vector<Club_in_Table>::iterator pos = clubs.erase(range_to_correct_iterators.first, range_to_correct_iterators.second);
+            clubs.insert(pos, range_to_correct_iterators.first, range_to_correct_iterators.second);
+
+
+            found_first = false;
+            iterators.clear();
+
+        }
+    }
+}
+
+
+struct Points_GoalsDifference
+{
+    static bool Comparator(const Club_in_Table &club_1, const Club_in_Table &club_2)
+    {
+        return club_1.points == club_2.points &&
+                (club_1.goals_scored - club_1.goals_conceded) == (club_2.goals_scored - club_2.goals_conceded);
+    }
+};
+
+
+//I need to group teams that have the same points and goal differences. Rest of teams - I do not care.
+//So I can do vector of vectors. I will push iterators of clubs to those vectors
+//Each vector means: teams with same points and goal differences
+//After inserting teams, vectors with size 0 will be removed -
+// because it means those teams are unique, and do not need sorting. They are in good place in table (maybe only names bad, but its not for this func ;p)
+void Bundesliga::Sort_By_Goals_Scored() //This doesn't work properly.
+{
+
+    Sort_By_Goals_Scored_Helper();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+bool Bundesliga::Check_if_Identical_Everything(const Club_in_Table &club_1, const Club_in_Table &club_2)
+{
+    return Check_if_Identical_GoalDifference(club_1, club_2) && club_1.goals_scored == club_2.goals_scored;
 }
 
 
@@ -279,7 +348,7 @@ void Bundesliga::Sort_By_Name()
     for(std::vector<Club_in_Table>::iterator club_iter = clubs.begin(); club_iter != clubs.end() -1; ++club_iter)
     {
         /* Save indexes of teams that are identical. Later, those indexes will be sorted by name. */
-        if(Check_if_Identical(*club_iter, *(club_iter +1)) == true)
+        if(Check_if_Identical_Everything(*club_iter, *(club_iter +1)) == true)
         {
             size_t index_1 = std::distance(clubs.begin(), club_iter);
             size_t index_2 = std::distance(clubs.begin(), club_iter +1);

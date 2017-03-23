@@ -18,8 +18,13 @@ private:
     void Sort_Table();
     void Sort_By_Goals();
     void Sort_By_Goals_Scored();
+    void Sort_By_Goals_Scored_Helper();
     void Sort_By_Name();
-    bool Check_if_Identical(const Club_in_Table &club_1, const Club_in_Table &club_2);
+
+
+    bool Check_if_Identical_GoalDifference(const Club_in_Table &club_1, const Club_in_Table &club_2);
+    bool Check_if_Identical_Everything(const Club_in_Table &club_1, const Club_in_Table &club_2);
+
 
 };
 
@@ -76,6 +81,18 @@ struct Club_in_Table
                             const std::vector<Club_in_Table>::iterator &club_2)
     {
         return club_1->name < club_2->name;
+    }
+
+    static bool Iterator_Based_Comparator_for_Goals_Scored (const std::vector<Club_in_Table>::iterator &club_1,
+                            const std::vector<Club_in_Table>::iterator &club_2)
+    {
+        return club_1->goals_scored > club_2->goals_scored;
+    }
+
+    static bool Comparator_For_Unique_Iterators(const Club_in_Table &club_1,
+                                                const Club_in_Table &club_2)
+    {
+        return &club_1 == &club_2; //Compare by memory addresess.
     }
 
     static bool Comparator_For_Range(const Club_in_Table &club_1, const Club_in_Table &club_2)
