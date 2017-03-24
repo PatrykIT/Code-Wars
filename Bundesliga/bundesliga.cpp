@@ -221,6 +221,34 @@ void Bundesliga::Sort_By_Goals()
 
 
 
+
+
+std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
+Find_Clubs_for_Swapping(std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_before_sorting_FINAL,
+                        std::vector<Club_in_Table> &clubs, size_t &counter, std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_after_sorting)
+{
+    /* This loop is for finding second club in original vector, and swapping them. */
+    for(auto iter = iterators_indexes_after_sorting.begin(); iter != iterators_indexes_after_sorting.end(); ++iter)
+    {
+        if(iterators_indexes_before_sorting_FINAL.at(counter) == iter->second)
+        {
+            std::vector<Club_in_Table>::iterator first_club;
+            /* Find first club in original vector. */
+            for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
+                if(club_iter == iterators_indexes_before_sorting_FINAL.at(counter))
+                    first_club = club_iter;
+
+            std::vector<Club_in_Table>::iterator second_club = clubs.begin() + iter->first;
+
+            std::cout << "Comparing from: " << first_club->name << "\n";
+            std::cout << "Comparing to: " << second_club->name << "\n";
+
+            return {first_club, second_club};
+        }
+    }
+}
+
+
 void Add_Matching_Iterators(std::vector<Club_in_Table>::iterator &club_iter, std::vector<std::vector<Club_in_Table>::iterator> &iterators,
                                         std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_before_sorting, int &index)
 {
@@ -375,7 +403,6 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
              * and after is 4, that means the in clubs vector i should swap (2, 4) ;) */
 
 
-            std::vector<Club_in_Table>::iterator first_club;
             /* Compare iterators. If they do not match, find matching iterator in a loop. Then, count the indexes difference and swap iterators
              * by positions. */
             size_t start_position = index_FINAL - iterators.size();
@@ -384,31 +411,14 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
                 /* If this is false, then that means that lhs team was sorted with some other. We need to find that other, and swap them in original container. */
                 if(iterators_indexes_before_sorting_FINAL.at(counter) != iterators_indexes_after_sorting.at(counter))
                 {
-                    /* This loop is for finding second club in original vector, and swapping them. */
-                    for(auto iter = iterators_indexes_after_sorting.begin(); iter != iterators_indexes_after_sorting.end(); ++iter)
-                    {
-                        if(iterators_indexes_before_sorting_FINAL.at(counter) == iter->second)
-                        {
-                            /* Find first club in original vector. */
-                            for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
-                                if(club_iter == iterators_indexes_before_sorting_FINAL.at(counter))
-                                    first_club = club_iter;
+                    auto clubs_to_swap = Find_Clubs_for_Swapping(iterators_indexes_before_sorting_FINAL, clubs, counter, iterators_indexes_after_sorting);
+                    Club_in_Table::Swap(*clubs_to_swap.first, *clubs_to_swap.second);
+                    //std::iter_swap(first, second);
 
-                            std::vector<Club_in_Table>::iterator second_club = clubs.begin() + iter->first;
+                    Erase_Elements_from_Map(iterators_indexes_before_sorting_FINAL, iterators_indexes_after_sorting, clubs_to_swap.first, clubs_to_swap.second);
 
-                            std::cout << "Comparing from: " << first_club->name << "\n";
-                            std::cout << "Comparing to: " << second_club->name << "\n";
-
-                            Club_in_Table::Swap(*first_club, *second_club);
-                            //std::iter_swap(first,
-                              //             second);
-
-                            Erase_Elements_from_Map(iterators_indexes_before_sorting_FINAL, iterators_indexes_after_sorting, first_club, second_club);
-
-                            Print_Clubs();
-                            break;
-                        }
-                    }
+                    Print_Clubs();
+                    break;
                 }
             }
 
