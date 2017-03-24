@@ -379,14 +379,17 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
     std::map<size_t, std::vector<Club_in_Table>::iterator> iterators_indexes_after_sorting;
     int index_sorted = 0;
 
+    bool need_sorting = false;
+
     for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
     {
         if(Check_if_Identical_GoalDifference(*club_iter, *(club_iter +1)) == true) //If this doesnt catch everything, write a function that compares all elements.
         {
             Add_Matching_Iterators(club_iter, iterators, iterators_indexes_before_sorting, index);
+            need_sorting = true;
         }
         /* Sort currently saved iterators and erase them, so the next ones can be saved & sorted. */
-        else
+        else if(need_sorting == true)
         {
             Remove_Repeating_Iterators(iterators, iterators_indexes_before_sorting);
 
@@ -413,7 +416,7 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
                 {
                     auto clubs_to_swap = Find_Clubs_for_Swapping(iterators_indexes_before_sorting_FINAL, clubs, counter, iterators_indexes_after_sorting);
                     Club_in_Table::Swap(*clubs_to_swap.first, *clubs_to_swap.second);
-                    //std::iter_swap(first, second);
+                    //std::iter_swap(clubs_to_swap.first, clubs_to_swap.second);
 
                     Erase_Elements_from_Map(iterators_indexes_before_sorting_FINAL, iterators_indexes_after_sorting, clubs_to_swap.first, clubs_to_swap.second);
 
@@ -430,6 +433,7 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
             iterators_indexes_before_sorting.clear();
             iterators_indexes_before_sorting_FINAL.clear();
             iterators_indexes_after_sorting.clear();
+            need_sorting = false;
         }
     }
 }
