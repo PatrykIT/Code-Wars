@@ -292,13 +292,9 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
                 ++index_FINAL;
             }
 
-
-            std::cout << "Before: \n";
-            for(auto club : iterators) { std::cout << club->name << "\n"; }
-
-            std::sort(iterators.begin(), iterators.end(), Club_in_Table::Iterator_Based_Comparator_for_Goals_Scored); //Check if this sorts original vector too. If not, then assign original here.
-            /* After sorting, I could find which elements were sorted. When I find them, I swap them in original clubs vector.
-             * For example, if element 4 changed with element 2, then I can change them in original vector. */
+            std::sort(iterators.begin(), iterators.end(), Club_in_Table::Iterator_Based_Comparator_for_Goals_Scored);
+            /* After sorting, I can find which elements were sorted. When I find them, I swap them in original clubs vector.
+             * For example, if element 4 changed with element 2, then I can change their positions in original vector. */
             std::map<size_t, std::vector<Club_in_Table>::iterator> iterators_indexes_after_sorting;
             index = 0;
 
@@ -313,6 +309,7 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
              * and after is 4, that means the in clubs vector i should swap (2, 4) ;) */
 
 
+            std::vector<Club_in_Table>::iterator first_club;
             /* Compare iterators. If they do not match, find matching iterator in a loop. Then, count the indexes difference and swap iterators
              * by positions. */
             for(size_t counter = 0; counter != iterators_indexes_before_sorting_FINAL.size(); ++counter)
@@ -320,21 +317,28 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
                 /* If this is false, then that means that lhs team was sorted with some other. We need to find that other, and swap them in original container. */
                 if(iterators_indexes_before_sorting_FINAL[counter] != iterators_indexes_after_sorting[counter])
                 {
+                    /* This loop is for finding second club in original vector, and swapping them. */
                     for(auto iter = iterators_indexes_after_sorting.begin(); iter != iterators_indexes_after_sorting.end(); ++iter)
                     {
                         if(iterators_indexes_before_sorting_FINAL[counter] == iter->second)
                         {
-                            int position_difference = iter->first - counter;
-                            std::vector<Club_in_Table>::iterator = std::find(clubs.begin(), clubs.end(), iter->second);
+                            /* Find first club in original vector. */
+                            for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
+                                if(club_iter == iterators_indexes_before_sorting_FINAL[counter])
+                                    first_club = club_iter;
 
+                            std::vector<Club_in_Table>::iterator second_club = clubs.begin() + iter->first;
 
-                            std::vector<Club_in_Table>::iterator first = clubs.begin() + std::distance(clubs.begin(), iterators_indexes_before_sorting_FINAL[counter]);
-                            std::vector<Club_in_Table>::iterator second = clubs.begin() + position_difference;
-                            Club_in_Table::Swap(*first, *second);
+                            std::cout << "Comparing from: " << first_club->name << "\n";
+                            std::cout << "Comparing to: " << second_club->name << "\n";
 
-                            std::iter_swap(first,
-                                           second);
+                            Club_in_Table::Swap(*first_club, *second_club);
+                            //std::iter_swap(first,
+                              //             second);
 
+                            /* Remove swapped elements. */
+                            iterators_indexes_before_sorting_FINAL.erase(counter);
+                            iterators_indexes_after_sorting.erase(iter->first);
                             Print_Clubs();
                             break;
                         }
