@@ -5,6 +5,7 @@
 #include <string>
 #include <initializer_list>
 #include <iostream>
+#include <tuple>
 
 struct Club_in_Table;
 
@@ -24,8 +25,11 @@ private:
 
     bool Check_if_Identical_GoalDifference(const Club_in_Table &club_1, const Club_in_Table &club_2);
     bool Check_if_Identical_Everything(const Club_in_Table &club_1, const Club_in_Table &club_2);
-
+    std::tuple<bool, std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
+    Search_All();
     void Print_Clubs();
+
+    std::tuple<int, int> AA();
 
 };
 

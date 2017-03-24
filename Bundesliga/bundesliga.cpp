@@ -220,7 +220,23 @@ void Bundesliga::Sort_By_Goals()
 
 
 
-
+std::tuple<bool, std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
+Bundesliga::Search_All()
+{
+    for(auto club_iterator = clubs.begin(); club_iterator != clubs.end() -1; ++club_iterator)
+    {
+        for(auto club_iterator_2 = clubs.begin() +1; club_iterator_2 != clubs.end(); ++club_iterator)
+        {
+            if(Check_if_Identical_GoalDifference(*club_iterator, *club_iterator_2) == true)
+            {
+                return std::tuple<bool, std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
+                {true, club_iterator, club_iterator_2};
+            }
+        }
+    }
+    return std::tuple<bool, std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
+    {false, clubs.end(), clubs.end()};
+}
 
 
 std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
@@ -246,18 +262,19 @@ Find_Clubs_for_Swapping(std::map<size_t, std::vector<Club_in_Table>::iterator> &
             return {first_club, second_club};
         }
     }
+    return {clubs.end(), clubs.end()};
 }
 
 
-void Add_Matching_Iterators(std::vector<Club_in_Table>::iterator &club_iter, std::vector<std::vector<Club_in_Table>::iterator> &iterators,
+void Add_Matching_Iterators(std::vector<Club_in_Table>::iterator &club_iter, std::vector<Club_in_Table>::iterator &club_iter_next, std::vector<std::vector<Club_in_Table>::iterator> &iterators,
                                         std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_before_sorting, int &index)
 {
         iterators.emplace_back(club_iter);
-        iterators.emplace_back(club_iter +1);
+        iterators.emplace_back(club_iter_next);
 
         iterators_indexes_before_sorting[index] = club_iter;
         ++index;
-        iterators_indexes_before_sorting[index] = club_iter +1;
+        iterators_indexes_before_sorting[index] = club_iter_next;
         ++index;
 }
 
@@ -383,9 +400,10 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
 
     for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
     {
-        if(Check_if_Identical_GoalDifference(*club_iter, *(club_iter +1)) == true) //If this doesnt catch everything, write a function that compares all elements.
+        auto searcher { Search_All() };
+        if(std::get<0>(searcher) == true)
         {
-            Add_Matching_Iterators(club_iter, iterators, iterators_indexes_before_sorting, index);
+            Add_Matching_Iterators(std::get<1>(searcher), std::get<2>(searcher), iterators, iterators_indexes_before_sorting, index);
             need_sorting = true;
         }
         /* Sort currently saved iterators and erase them, so the next ones can be saved & sorted. */
