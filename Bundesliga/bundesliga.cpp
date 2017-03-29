@@ -220,22 +220,67 @@ void Bundesliga::Sort_By_Goals()
 
 
 
-std::tuple<bool, std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
-Bundesliga::Search_All()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//I need also check if teams are not sorted beforehand.
+std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator , std::vector<Club_in_Table>::iterator>
+Bundesliga::Search_All(std::vector<Club_in_Table>::iterator club_to_analyse,
+                       std::vector<std::vector<Club_in_Table>::iterator> &copy_of_clubs)
 {
-    for(auto club_iterator = clubs.begin(); club_iterator != clubs.end() -1; ++club_iterator)
+std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator,
+        std::vector<Club_in_Table>::iterator> /* [Bool if found identical clubs, iterators, first iterator, last iterator] */
+        return_value;
+
+    std::vector<std::vector<Club_in_Table>::iterator> identical_clubs;
+    std::vector<Club_in_Table>::iterator first;
+    std::vector<Club_in_Table>::iterator last;
+    bool found_identical_goal_difference = false, found_first = false;
+
+    for(auto club_iterator = copy_of_clubs.begin(); club_iterator != copy_of_clubs.end(); ++club_iterator)
     {
-        for(auto club_iterator_2 = clubs.begin() +1; club_iterator_2 != clubs.end(); ++club_iterator)
+        if(Check_if_Identical_GoalDifference(*club_to_analyse, **club_iterator) == true)
         {
-            if(Check_if_Identical_GoalDifference(*club_iterator, *club_iterator_2) == true)
+            if(found_first == false)
             {
-                return std::tuple<bool, std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
-                {true, club_iterator, club_iterator_2};
+                first = *club_iterator; //Save first iterator
+                found_first = false;
             }
+
+            if(club_to_analyse->name != (*club_iterator)->name)
+                found_identical_goal_difference = true;
+
+            identical_clubs.push_back(*club_iterator);
+            club_iterator = copy_of_clubs.erase(club_iterator) -1; //-1 because on repeat of the loop, the counter will be +1
+            last = identical_clubs.back(); //Save last iterator
         }
     }
-    return std::tuple<bool, std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
-    {false, clubs.end(), clubs.end()};
+
+    if(found_identical_goal_difference)
+        std::get<0>(return_value) = true;
+    else
+        std::get<0>(return_value) = false;
+
+    std::get<1>(return_value) = identical_clubs;
+    std::get<2>(return_value) = first;
+    std::get<3>(return_value) = last;
+
+    return return_value;
 }
 
 
@@ -266,16 +311,12 @@ Find_Clubs_for_Swapping(std::map<size_t, std::vector<Club_in_Table>::iterator> &
 }
 
 
-void Add_Matching_Iterators(std::vector<Club_in_Table>::iterator &club_iter, std::vector<Club_in_Table>::iterator &club_iter_next, std::vector<std::vector<Club_in_Table>::iterator> &iterators,
-                                        std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_before_sorting, int &index)
+void Add_Matching_Iterators(std::vector<std::vector<Club_in_Table>::iterator> identical_clubs, std::vector<std::vector<Club_in_Table>::iterator> &iterators)
 {
-        iterators.emplace_back(club_iter);
-        iterators.emplace_back(club_iter_next);
-
-        iterators_indexes_before_sorting[index] = club_iter;
-        ++index;
-        iterators_indexes_before_sorting[index] = club_iter_next;
-        ++index;
+        for(auto current_club = identical_clubs.begin(); current_club != identical_clubs.end(); ++current_club)
+        {
+            iterators.emplace_back(*current_club);
+        }
 }
 
 void Add_Sorted_Matching_Iterators(std::vector<std::vector<Club_in_Table>::iterator> &iterators,
@@ -382,6 +423,8 @@ bool Bundesliga::Check_if_Identical_GoalDifference(const Club_in_Table &club_1, 
 
 
 
+
+
 void Bundesliga::Sort_By_Goals_Scored_Helper()
 {
     /* We know that teams will be already grouped by points and goal difference. Now I need to sort clubs that have the same goal difference,
@@ -389,72 +432,61 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
 
 
     std::vector<std::vector<Club_in_Table>::iterator> iterators;
-    std::map<size_t, std::vector<Club_in_Table>::iterator> iterators_indexes_before_sorting;
-    int index = 0;
-    std::map<size_t, std::vector<Club_in_Table>::iterator> iterators_indexes_before_sorting_FINAL;
-    int index_FINAL = 0;
-    std::map<size_t, std::vector<Club_in_Table>::iterator> iterators_indexes_after_sorting;
-    int index_sorted = 0;
-
     bool need_sorting = false;
+
+    std::vector<std::vector<Club_in_Table>::iterator> copy_of_clubs;
+    for(auto iter = clubs.begin(); iter != clubs.end(); ++iter)
+        copy_of_clubs.push_back(iter);
 
     for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
     {
-        auto searcher { Search_All() };
+        auto searcher { Search_All(club_iter, copy_of_clubs) };
         if(std::get<0>(searcher) == true)
         {
-            Add_Matching_Iterators(std::get<1>(searcher), std::get<2>(searcher), iterators, iterators_indexes_before_sorting, index);
+            Add_Matching_Iterators(std::get<1>(searcher), iterators);
             need_sorting = true;
         }
         /* Sort currently saved iterators and erase them, so the next ones can be saved & sorted. */
-        else if(need_sorting == true)
+        if(need_sorting == true)
         {
-            Remove_Repeating_Iterators(iterators, iterators_indexes_before_sorting);
+            // Here, first delete the old iterators in copy_of_clubs in pos [first, last] (or [first, last+1) ).
+            // Remember start position from which they were removed!
 
-            /* Count again indexes, because repeating iterators made them +1 bigger each. */
-            Recount_Indexes(iterators_indexes_before_sorting, iterators_indexes_before_sorting_FINAL, index_FINAL);
+            std::vector<Club_in_Table>::iterator first = std::get<2>(searcher);
+            std::vector<Club_in_Table>::iterator last = std::get<3>(searcher);
+
+            std::vector<std::vector<Club_in_Table>::iterator>::iterator find_first = std::find(copy_of_clubs.begin(),
+                                                                                               copy_of_clubs.end(), first);
+            //std::vector<std::vector<Club_in_Table>::iterator>::iterator find_last = std::find(copy_of_clubs.begin(),
+              //                                                                                 copy_of_clubs.end(), last); //Here is a bug. It finds wrong club.
+
+            std::vector<std::vector<Club_in_Table>::iterator>::iterator find_last = std::find_if(copy_of_clubs.begin(), copy_of_clubs.end(),
+                                                                                                 [&last] (std::vector<std::vector<Club_in_Table>::iterator> current)
+                    -> bool {return Club_in_Table::Iterator_Based_Comparator_for_Clubs(last, current); } );
+
+
+
+            std::vector<std::vector<Club_in_Table>::iterator>::iterator position_to_insert_sorted_iterators =
+                    copy_of_clubs.erase(find_first, find_last +1);
+
 
             std::sort(iterators.begin(), iterators.end(), Club_in_Table::Iterator_Based_Comparator_for_Goals_Scored);
-            /* After sorting, I can find which elements were sorted. When I find them, I swap them in original clubs vector.
-             * For example, if element 4 changed with element 2, then I can change their positions in original vector. */
-            Add_Sorted_Matching_Iterators(iterators, iterators_indexes_after_sorting, index_sorted);
 
-            /* So now i have two maps (before sorting, after sorting). I can compare all keys and iterators. If some keys do not have same
-             * iterators, that means they were sorted. So, then: Take the key of before, and see where is after key. For example if before was 2,
-             * and after is 4, that means the in clubs vector i should swap (2, 4) ;) */
+            copy_of_clubs.insert(position_to_insert_sorted_iterators, iterators.begin(), iterators.end());
 
-
-            /* Compare iterators. If they do not match, find matching iterator in a loop. Then, count the indexes difference and swap iterators
-             * by positions. */
-            size_t start_position = index_FINAL - iterators.size();
-            for(size_t counter = start_position; counter != index_FINAL; ++counter)
-            {
-                /* If this is false, then that means that lhs team was sorted with some other. We need to find that other, and swap them in original container. */
-                if(iterators_indexes_before_sorting_FINAL.at(counter) != iterators_indexes_after_sorting.at(counter))
-                {
-                    auto clubs_to_swap = Find_Clubs_for_Swapping(iterators_indexes_before_sorting_FINAL, clubs, counter, iterators_indexes_after_sorting);
-                    Club_in_Table::Swap(*clubs_to_swap.first, *clubs_to_swap.second);
-                    //std::iter_swap(clubs_to_swap.first, clubs_to_swap.second);
-
-                    Erase_Elements_from_Map(iterators_indexes_before_sorting_FINAL, iterators_indexes_after_sorting, clubs_to_swap.first, clubs_to_swap.second);
-
-                    Print_Clubs();
-                    break;
-                }
-            }
-
-            std::cout << "After: \n";
-            for(auto club : iterators) { std::cout << club->name << "\n"; }
+            std::cout << "COPY OF CLUBS AFTER SORTING: \n";
+            for(auto club : copy_of_clubs)
+                std::cout << "Name: " << (club)->name << "\n";
+            //After sorting, add those iterators to copy of clubs in places from they were removed before.
+            //Overwrite clubs with copy of clubs.
 
 
             iterators.clear();
-            iterators_indexes_before_sorting.clear();
-            iterators_indexes_before_sorting_FINAL.clear();
-            iterators_indexes_after_sorting.clear();
             need_sorting = false;
         }
     }
 }
+
 
 
 struct Points_GoalsDifference

@@ -25,12 +25,10 @@ private:
 
     bool Check_if_Identical_GoalDifference(const Club_in_Table &club_1, const Club_in_Table &club_2);
     bool Check_if_Identical_Everything(const Club_in_Table &club_1, const Club_in_Table &club_2);
-    std::tuple<bool, std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
-    Search_All();
+    std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator , std::vector<Club_in_Table>::iterator>
+    Search_All (std::vector<Club_in_Table>::iterator club_to_analyse,
+                std::vector<std::vector<Club_in_Table>::iterator> &copy_of_clubs);
     void Print_Clubs();
-
-    std::tuple<int, int> AA();
-
 };
 
 
@@ -89,6 +87,12 @@ struct Club_in_Table
                             const std::vector<Club_in_Table>::iterator &club_2)
     {
         return club_1->goals_scored > club_2->goals_scored;
+    }
+
+    static bool Iterator_Based_Comparator_for_Clubs(const std::vector<Club_in_Table>::iterator &club_1,
+                                                    const std::vector<Club_in_Table>::iterator &club_2)
+    {
+        return false;
     }
 
     static bool Comparator_For_Unique_Iterators(const Club_in_Table &club_1,
