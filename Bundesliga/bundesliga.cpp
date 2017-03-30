@@ -52,8 +52,29 @@ std::string Bundesliga::table(std::vector<std::string> results)
 
         if(token == "-")
         {
-            //I think we should ignore whole iteration, because it means the match wasn't played yet.
-            continue;
+            goals_team_1 = 0;
+            match_string.erase(0, match_string.find(delimeter) + delimeter.length());
+
+            /* 6:[0] FC Bayern München - Werder Bremen */
+            token = match_string.substr(0, match_string.find(delimeter_2));
+            goals_team_2 = 0;
+            match_string.erase(0, match_string.find(delimeter_2) + delimeter.length());
+
+            /* 6:0 [FC Bayern München] - Werder Bremen */
+            token = match_string.substr(0, match_string.find(delimeter_3));
+            teams_playing[0] = token;
+            match_string.erase(0, match_string.find(delimeter_3) + delimeter_3.length());
+
+            /* 6:0 FC Bayern München - [Werder Bremen] */
+            token = match_string.substr(0);
+            teams_playing[1] = token;
+
+            Club_in_Table club_1, club_2;
+            club_1.name = teams_playing[0];
+            club_2.name = teams_playing[1];
+
+            clubs.emplace_back(club_1);
+            clubs.emplace_back(club_2);
         }
         else
         {
@@ -146,7 +167,14 @@ std::string Bundesliga::table(std::vector<std::string> results)
     }
 
     Sort_Table();
-    return std::string();
+
+    return Return_Final_Table();
+}
+
+
+std::string Bundesliga::Return_Final_Table()
+{
+
 }
 
 
@@ -174,7 +202,7 @@ void Bundesliga::Sort_Table()
          std::cout << club.name << " P: " << club.points << " G: " << club.goals_scored << ":" <<
                      club.goals_conceded << "\n"; std::cout << "\n\n";
 
-    //Sort_By_Name();
+    Sort_By_Name();
 
     //4. Otherwise: The teams share the same place, but ordered by the name of the team (case-insensitive).
     //So now I need to mark teams that have in common: points, difference of goals, goals scored (So actually all of these 3 must be the same)
@@ -240,10 +268,10 @@ void Bundesliga::Sort_By_Goals()
 
 //I need also check if teams are not sorted beforehand.
 std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator , std::vector<Club_in_Table>::iterator>
-Bundesliga::Search_All(std::vector<Club_in_Table>::iterator club_to_analyse,
+Bundesliga::Search_All_Equal_Goal_Difference(std::vector<Club_in_Table>::iterator club_to_analyse,
                        std::vector<std::vector<Club_in_Table>::iterator> &copy_of_clubs)
 {
-std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator,
+    std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator,
         std::vector<Club_in_Table>::iterator> /* [Bool if found identical clubs, iterators, first iterator, last iterator] */
         return_value;
 
@@ -283,6 +311,53 @@ std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<
 
     return return_value;
 }
+
+
+std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator , std::vector<Club_in_Table>::iterator>
+Bundesliga::Search_All_Equal_Everything (std::vector<Club_in_Table>::iterator club_to_analyse,
+            std::vector<std::vector<Club_in_Table>::iterator> &copy_of_clubs)
+{
+    std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator,
+            std::vector<Club_in_Table>::iterator> /* [Bool if found identical clubs, iterators, first iterator, last iterator] */
+            return_value;
+
+        std::vector<std::vector<Club_in_Table>::iterator> identical_clubs;
+        std::vector<std::vector<Club_in_Table>::iterator> copy_of_copy_clubs = copy_of_clubs;
+        std::vector<Club_in_Table>::iterator first;
+        std::vector<Club_in_Table>::iterator last;
+        bool found_identical_goal_difference = false, found_first = false;
+
+        for(auto club_iterator = copy_of_copy_clubs.begin(); club_iterator != copy_of_copy_clubs.end(); ++club_iterator)
+        {
+            if(Check_if_Identical_Everything(*club_to_analyse, **club_iterator) == true)
+            {
+                if(found_first == false)
+                {
+                    first = *club_iterator; //Save first iterator
+                    found_first = true;
+                }
+
+                if(club_to_analyse->name != (*club_iterator)->name)
+                    found_identical_goal_difference = true;
+
+                identical_clubs.push_back(*club_iterator);
+                club_iterator = copy_of_copy_clubs.erase(club_iterator) -1; //-1 because on repeat of the loop, the counter will be +1
+                last = identical_clubs.back(); //Save last iterator
+            }
+        }
+
+        if(found_identical_goal_difference)
+            std::get<0>(return_value) = true;
+        else
+            std::get<0>(return_value) = false;
+
+        std::get<1>(return_value) = identical_clubs;
+        std::get<2>(return_value) = first;
+        std::get<3>(return_value) = last;
+
+        return return_value;
+}
+
 
 
 std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
@@ -329,14 +404,70 @@ bool Bundesliga::Check_if_Identical_GoalDifference(const Club_in_Table &club_1, 
 }
 
 
-struct Points_GoalsDifference
+void Bundesliga::Custom_Sort(std::function<bool(std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator)> iterator_comparision,
+                 std::function<bool(std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator)> iterator_sort_comparision,
+                 std::function<std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>,
+                             std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
+                 (std::vector<Club_in_Table>::iterator, std::vector<std::vector<Club_in_Table>::iterator>)> search_function)
 {
-    static bool Comparator(const Club_in_Table &club_1, const Club_in_Table &club_2)
+    std::vector<std::vector<Club_in_Table>::iterator> iterators;
+    bool need_sorting = false;
+
+    std::vector<std::vector<Club_in_Table>::iterator> copy_of_clubs;
+    for(auto iter = clubs.begin(); iter != clubs.end(); ++iter)
+        copy_of_clubs.push_back(iter);
+
+    for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
     {
-        return club_1.points == club_2.points &&
-                (club_1.goals_scored - club_1.goals_conceded) == (club_2.goals_scored - club_2.goals_conceded);
+        auto searcher { search_function(club_iter, copy_of_clubs) };
+        if(std::get<0>(searcher) == true)
+        {
+            Add_Matching_Iterators(std::get<1>(searcher), iterators);
+            need_sorting = true;
+        }
+        /* Sort currently saved iterators and erase them, so the next ones can be saved & sorted. */
+        if(need_sorting == true)
+        {
+            std::vector<Club_in_Table>::iterator first = std::get<2>(searcher);
+            std::vector<Club_in_Table>::iterator last = std::get<3>(searcher);
+
+            /* Find first iterator of range of unsorted clubs. */
+            std::vector<std::vector<Club_in_Table>::iterator>::iterator find_first = std::find_if(copy_of_clubs.begin(), copy_of_clubs.end(),
+                                                                                                  [&first, &iterator_comparision]
+                                                                                                  (std::vector<Club_in_Table>::iterator current)
+                    -> bool {return iterator_comparision(first, current); });
+
+            /* Find last iterator of range of unsorted clubs. */
+            std::vector<std::vector<Club_in_Table>::iterator>::iterator find_last = std::find_if(copy_of_clubs.begin(), copy_of_clubs.end(),
+                                                                                                 [&last, &iterator_comparision]
+                                                                                                 (std::vector<Club_in_Table>::iterator current)
+                    -> bool {return iterator_comparision(last, current); } );
+
+            /* Remove range of unsorted clubs. */
+            std::vector<std::vector<Club_in_Table>::iterator>::iterator position_to_insert_sorted_iterators =
+                    copy_of_clubs.erase(find_first, find_last +1);
+
+            std::sort(iterators.begin(), iterators.end(), iterator_sort_comparision);
+
+            /* Insert already sorted clubs. */
+            copy_of_clubs.insert(position_to_insert_sorted_iterators, iterators.begin(), iterators.end());
+
+            /* Remove sorted iterators, so the next ranges of clubs could be sorted. */
+            iterators.clear();
+            need_sorting = false;
+        }
     }
-};
+
+
+    /* Save new club hierarchy */
+    std::vector<Club_in_Table> clubs_finished;
+    for(auto iter = copy_of_clubs.begin(); iter != copy_of_clubs.end(); ++iter)
+    {
+        clubs_finished.emplace_back(**iter);
+    }
+    clubs = clubs_finished;
+}
+
 
 
 void Bundesliga::Sort_By_Goals_Scored()
@@ -344,7 +475,6 @@ void Bundesliga::Sort_By_Goals_Scored()
 
     /* We know that teams will be already grouped by points and goal difference. Now I need to sort clubs that have the same goal difference,
      * but more goals scored. */
-
 
     std::vector<std::vector<Club_in_Table>::iterator> iterators;
     bool need_sorting = false;
@@ -355,7 +485,7 @@ void Bundesliga::Sort_By_Goals_Scored()
 
     for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
     {
-        auto searcher { Search_All(club_iter, copy_of_clubs) };
+        auto searcher { Search_All_Equal_Goal_Difference(club_iter, copy_of_clubs) };
         if(std::get<0>(searcher) == true)
         {
             Add_Matching_Iterators(std::get<1>(searcher), iterators);
@@ -400,19 +530,7 @@ void Bundesliga::Sort_By_Goals_Scored()
         clubs_finished.emplace_back(**iter);
     }
     clubs = clubs_finished;
-
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 bool Bundesliga::Check_if_Identical_Everything(const Club_in_Table &club_1, const Club_in_Table &club_2)
@@ -421,97 +539,66 @@ bool Bundesliga::Check_if_Identical_Everything(const Club_in_Table &club_1, cons
 }
 
 
-//Alternative: std::find_if. Maybe I wouldn't need to save iterators manually.
-//This function (not find_if): Why do I convert iterators to indexes if later do I convert it back to original?
-//This can be merged!
 void Bundesliga::Sort_By_Name()
 {
     //So now I need to mark teams that have in common: points, difference of goals, goals scored (So actually all of these 3 must be the same)
     //We know that clubs are already sorted how they should be. We should only compare clubs that have identical [points, difference goals, goals scored].
 
-    std::vector<std::set<size_t>> indexes (18);
-    int current_set = 0;
+    std::vector<std::vector<Club_in_Table>::iterator> iterators;
+    bool need_sorting = false;
 
-    /* CONVERT ITERATORS OF CLUBS THAT HAVE THE SAME [POINTS, GOALS SCORED, GOALS DIFFERENCE] TO INDEXES */
-    for(std::vector<Club_in_Table>::iterator club_iter = clubs.begin(); club_iter != clubs.end() -1; ++club_iter)
-    {
-        /* Save indexes of teams that are identical. Later, those indexes will be sorted by name. */
-        if(Check_if_Identical_Everything(*club_iter, *(club_iter +1)) == true)
-        {
-            size_t index_1 = std::distance(clubs.begin(), club_iter);
-            size_t index_2 = std::distance(clubs.begin(), club_iter +1);
-
-            indexes.at(current_set).emplace(index_1);
-            indexes.at(current_set).emplace(index_2);
-        }
-        else //Means we moved on to the next group of teams
-        {
-            current_set++;
-        }
-    }
-
-    /* REMOVE EMPTY SETS */
-    for(std::vector<std::set<size_t>>::iterator it = indexes.begin(); it != indexes.end(); ++it)
-    {
-        if(it->empty())
-        {
-           indexes.erase(it);
-           it = indexes.begin();
-        }
-    }
-
-    /* Vector of iterators */
-    std::vector<std::vector<std::vector<Club_in_Table>::iterator>> iterators (18);
-    int current_vector = 0;
-
-    /* Now I should have vector, that has vectors. Each of those vectors holds indexes to the group of same teams, that needs to be sorted by name. */
-    /* CONVERT INDEXES TO ITERATORS */
-    for(std::set<size_t> current_vec : indexes)
-    {
-        /* Convert indexes to iterators. */
-        for(size_t index : current_vec)
-        {
-            std::vector<Club_in_Table>::iterator current_iter = clubs.begin() + index;
-            iterators.at(current_vector).push_back(current_iter);
-        }
-
-        ++current_vector;
-    }
-
-    /* Erase the rest of vectors that were not filled. */
-    iterators.erase(iterators.begin() + current_vector, iterators.end());
-
-    /* Sort elements by names. */
-    for(std::vector<std::vector<Club_in_Table>::iterator> &iter : iterators)
-    {
-        std::sort(iter.begin(), iter.end(), Club_in_Table::Iterator_Based_Comparator_for_Names);
-    }
-
-
-    std::vector<Club_in_Table> final_table;
-    for(std::vector<std::vector<Club_in_Table>::iterator> &iter : iterators)
-    {
-        for(auto temp : iter)
-            final_table.push_back(*temp);
-    }
-
-    /* For every element in "clubs": If element is not in "final_table", insert him, with position that he had in original
-     * vector.  */
+    std::vector<std::vector<Club_in_Table>::iterator> copy_of_clubs;
     for(auto iter = clubs.begin(); iter != clubs.end(); ++iter)
+        copy_of_clubs.push_back(iter);
+
+    for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
     {
-        std::vector<Club_in_Table>::iterator position = std::find(final_table.begin(), final_table.end(), *iter);
-        /* Means club is not in final table - we need to put it, with appriopriate position */
-        if(position == final_table.end())
+        auto searcher { Search_All_Equal_Everything(club_iter, copy_of_clubs) };
+        if(std::get<0>(searcher) == true)
         {
-            size_t index = std::distance(clubs.begin(), iter);
-            final_table.insert(final_table.begin() + index, *iter);
+            Add_Matching_Iterators(std::get<1>(searcher), iterators);
+            need_sorting = true;
+        }
+        /* Sort currently saved iterators and erase them, so the next ones can be saved & sorted. */
+        if(need_sorting == true)
+        {
+            std::vector<Club_in_Table>::iterator first = std::get<2>(searcher);
+            std::vector<Club_in_Table>::iterator last = std::get<3>(searcher);
+
+            /* Find first iterator of range of unsorted clubs. */
+            std::vector<std::vector<Club_in_Table>::iterator>::iterator find_first = std::find_if(copy_of_clubs.begin(), copy_of_clubs.end(),
+                                                                                                  [&first] (std::vector<Club_in_Table>::iterator current)
+                    -> bool {return Club_in_Table::Iterator_Based_Comparator_for_Clubs(first, current); });
+
+            /* Find last iterator of range of unsorted clubs. */
+            std::vector<std::vector<Club_in_Table>::iterator>::iterator find_last = std::find_if(copy_of_clubs.begin(), copy_of_clubs.end(),
+                                                                                                 [&last] (std::vector<Club_in_Table>::iterator current)
+                    -> bool {return Club_in_Table::Iterator_Based_Comparator_for_Clubs(last, current); } );
+
+            /* Remove range of unsorted clubs. */
+            std::vector<std::vector<Club_in_Table>::iterator>::iterator position_to_insert_sorted_iterators =
+                    copy_of_clubs.erase(find_first, find_last +1);
+
+            std::sort(iterators.begin(), iterators.end(), Club_in_Table::Iterator_Based_Comparator_for_Names);
+
+            /* Insert already sorted clubs. */
+            copy_of_clubs.insert(position_to_insert_sorted_iterators, iterators.begin(), iterators.end());
+
+            /* Remove sorted iterators, so the next ranges of clubs could be sorted. */
+            iterators.clear();
+            need_sorting = false;
         }
     }
 
-    clubs = final_table;
+
+    /* Save new club hierarchy */
+    std::vector<Club_in_Table> clubs_finished;
+    for(auto iter = copy_of_clubs.begin(); iter != copy_of_clubs.end(); ++iter)
+    {
+        clubs_finished.emplace_back(**iter);
+    }
+    clubs = clubs_finished;
 }
-
-
 
 
 

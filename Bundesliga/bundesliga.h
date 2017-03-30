@@ -6,6 +6,7 @@
 #include <initializer_list>
 #include <iostream>
 #include <tuple>
+#include <functional>
 
 struct Club_in_Table;
 
@@ -21,12 +22,26 @@ private:
     void Sort_By_Goals_Scored();
     void Sort_By_Name();
 
+    std::string Return_Final_Table();
 
-    bool Check_if_Identical_GoalDifference(const Club_in_Table &club_1, const Club_in_Table &club_2);
-    bool Check_if_Identical_Everything(const Club_in_Table &club_1, const Club_in_Table &club_2);
+
+    static bool Check_if_Identical_GoalDifference(const Club_in_Table &club_1, const Club_in_Table &club_2);
+    static bool Check_if_Identical_Everything(const Club_in_Table &club_1, const Club_in_Table &club_2);
+
     std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator , std::vector<Club_in_Table>::iterator>
-    Search_All (std::vector<Club_in_Table>::iterator club_to_analyse,
+    Search_All_Equal_Goal_Difference (std::vector<Club_in_Table>::iterator club_to_analyse,
                 std::vector<std::vector<Club_in_Table>::iterator> &copy_of_clubs);
+
+    static std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator , std::vector<Club_in_Table>::iterator>
+    Search_All_Equal_Everything (std::vector<Club_in_Table>::iterator club_to_analyse,
+                std::vector<std::vector<Club_in_Table>::iterator> &copy_of_clubs);
+
+
+    void Custom_Sort(std::function<bool(std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator)> iterator_comparision,
+                     std::function<bool(std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator)> iterator_sort_comparision,
+                     std::function<std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
+                     (std::vector<Club_in_Table>::iterator, std::vector<std::vector<Club_in_Table>::iterator>)> search_function);
+
     void Print_Clubs();
 };
 
