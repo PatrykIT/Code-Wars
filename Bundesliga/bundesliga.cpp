@@ -1,12 +1,8 @@
 #include "bundesliga.h"
 #include <iostream>
 #include <array>
-#include <map>
 #include <algorithm>
 #include <set>
-#include <typeinfo>
-#include <functional>
-
 
 using std::cout;
 
@@ -38,8 +34,6 @@ std::string Bundesliga::table(std::vector<std::string> results)
     std::vector<int> numbers { 10, 10, 20, 30, 40 };
     std::pair<std::vector<int>::iterator, std::vector<int>::iterator> range;
     range = std::equal_range(numbers.begin(), numbers.end(), 10);
-    //std::cout << "Begin: " << &*range.first << "\nEnd: " << &*range.second << "\n";
-
 
     for(auto match = results.begin(); match != results.end(); ++match)
     {
@@ -292,26 +286,6 @@ void Bundesliga::Sort_By_Goals()
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//I need also check if teams are not sorted beforehand.
 std::tuple<bool, std::vector<std::vector<Club_in_Table>::iterator>, std::vector<Club_in_Table>::iterator , std::vector<Club_in_Table>::iterator>
 Bundesliga::Search_All_Equal_Goal_Difference(std::vector<Club_in_Table>::iterator club_to_analyse,
                        std::vector<std::vector<Club_in_Table>::iterator> &copy_of_clubs)
@@ -402,35 +376,6 @@ Bundesliga::Search_All_Equal_Everything (std::vector<Club_in_Table>::iterator cl
 
         return return_value;
 }
-
-
-
-std::pair<std::vector<Club_in_Table>::iterator, std::vector<Club_in_Table>::iterator>
-Find_Clubs_for_Swapping(std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_before_sorting_FINAL,
-                        std::vector<Club_in_Table> &clubs, size_t &counter, std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_after_sorting)
-{
-    /* This loop is for finding second club in original vector, and swapping them. */
-    for(auto iter = iterators_indexes_after_sorting.begin(); iter != iterators_indexes_after_sorting.end(); ++iter)
-    {
-        if(iterators_indexes_before_sorting_FINAL.at(counter) == iter->second)
-        {
-            std::vector<Club_in_Table>::iterator first_club;
-            /* Find first club in original vector. */
-            for(auto club_iter = clubs.begin(); club_iter != clubs.end(); ++club_iter)
-                if(club_iter == iterators_indexes_before_sorting_FINAL.at(counter))
-                    first_club = club_iter;
-
-            std::vector<Club_in_Table>::iterator second_club = clubs.begin() + iter->first;
-
-            std::cout << "Comparing from: " << first_club->name << "\n";
-            std::cout << "Comparing to: " << second_club->name << "\n";
-
-            return {first_club, second_club};
-        }
-    }
-    return {clubs.end(), clubs.end()};
-}
-
 
 void Add_Matching_Iterators(std::vector<std::vector<Club_in_Table>::iterator> identical_clubs, std::vector<std::vector<Club_in_Table>::iterator> &iterators)
 {
