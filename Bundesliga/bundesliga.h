@@ -19,7 +19,6 @@ private:
     void Sort_Table();
     void Sort_By_Goals();
     void Sort_By_Goals_Scored();
-    void Sort_By_Goals_Scored_Helper();
     void Sort_By_Name();
 
 

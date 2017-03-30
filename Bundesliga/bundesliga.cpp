@@ -320,99 +320,6 @@ void Add_Matching_Iterators(std::vector<std::vector<Club_in_Table>::iterator> id
         }
 }
 
-void Add_Sorted_Matching_Iterators(std::vector<std::vector<Club_in_Table>::iterator> &iterators,
-                                   std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_after_sorting, int &index_sorted)
-{
-    for(auto iter = iterators.begin(); iter != iterators.end(); ++iter)
-    {
-        iterators_indexes_after_sorting[index_sorted] = *iter;
-        ++index_sorted;
-    }
-}
-
-
-void Recount_Indexes(std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_before_sorting, std::map<size_t,
-                     std::vector<Club_in_Table>::iterator> &iterators_indexes_before_sorting_FINAL, int &index_FINAL)
-{
-    for(auto iter = iterators_indexes_before_sorting.begin(); iter != iterators_indexes_before_sorting.end(); ++iter)
-    {
-        iterators_indexes_before_sorting_FINAL.emplace(index_FINAL, iter->second);
-        ++index_FINAL;
-    }
-}
-
-
-void Remove_Repeating_Iterators(std::vector<std::vector<Club_in_Table>::iterator> &iterators,
-                                std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_before_sorting)
-{
-    /* Remove repeating iterators */
-    for(auto iter = iterators.begin(); iter != iterators.end() -1; ++iter)
-    {
-        Club_in_Table *club_1 = &(**iter);
-        Club_in_Table *club_2 = &(**(iter +1));
-
-        if(Club_in_Table::Comparator_For_Unique_Iterators(*club_1, *club_2) == true)
-        {
-            /* Remove repeating iterator from map */
-            for(auto iter_map = iterators_indexes_before_sorting.begin(); iter_map != iterators_indexes_before_sorting.end(); ++iter_map)
-            {
-                if(iter_map->second == *iter)
-                {
-                    iterators_indexes_before_sorting.erase(iter_map->first);
-                    break;
-                }
-            }
-            iterators.erase(iter);
-            iter = iterators.begin();
-        }
-    }
-}
-
-
-
-void Erase_Elements_from_Map(std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_before_sorting_FINAL,
-                             std::map<size_t, std::vector<Club_in_Table>::iterator> &iterators_indexes_after_sorting,
-                             std::vector<Club_in_Table>::iterator &first_club, std::vector<Club_in_Table>::iterator &second_club)
-{
-    /* Take the key from second map, see what club it is, find this club in this map (so search by value) and erase it. */
-    std::vector<Club_in_Table>::iterator club_to_erase = first_club;
-    std::vector<Club_in_Table>::iterator club_to_erase_second = second_club;
-
-    /* Remove swapped elements. */
-    for(auto eraser = iterators_indexes_before_sorting_FINAL.begin(); eraser != iterators_indexes_before_sorting_FINAL.end(); ++eraser)
-    {
-        if(eraser->second == club_to_erase)
-        {
-            std::cout << "Removing (1_1): " << eraser->second->name << "\n";
-            iterators_indexes_before_sorting_FINAL.erase(eraser->first);
-            eraser = iterators_indexes_before_sorting_FINAL.begin();
-        }
-        if(eraser->second == club_to_erase_second)
-        {
-            std::cout << "Removing (2_1): " << eraser->second->name << "\n";
-            iterators_indexes_before_sorting_FINAL.erase(eraser->first);
-            eraser = iterators_indexes_before_sorting_FINAL.begin();
-        }
-    }
-
-    for(auto eraser = iterators_indexes_after_sorting.begin(); eraser != iterators_indexes_after_sorting.end(); ++eraser)
-    {
-        if(eraser->second == club_to_erase)
-        {
-            std::cout << "Removing_C2 (2_1): " << iterators_indexes_after_sorting.at(eraser->first)->name << "\n";
-            iterators_indexes_after_sorting.erase(eraser->first);
-            eraser = iterators_indexes_after_sorting.begin();
-        }
-        if(eraser->second == club_to_erase_second)
-        {
-            std::cout << "Removing_C2 (2_2): " << iterators_indexes_after_sorting.at(eraser->first)->name << "\n";
-            iterators_indexes_after_sorting.erase(eraser->first);
-            eraser = iterators_indexes_after_sorting.begin();
-        }
-    }
-}
-
-
 
 bool Bundesliga::Check_if_Identical_GoalDifference(const Club_in_Table &club_1, const Club_in_Table &club_2)
 {
@@ -422,12 +329,19 @@ bool Bundesliga::Check_if_Identical_GoalDifference(const Club_in_Table &club_1, 
 }
 
 
-
-
-
-
-void Bundesliga::Sort_By_Goals_Scored_Helper()
+struct Points_GoalsDifference
 {
+    static bool Comparator(const Club_in_Table &club_1, const Club_in_Table &club_2)
+    {
+        return club_1.points == club_2.points &&
+                (club_1.goals_scored - club_1.goals_conceded) == (club_2.goals_scored - club_2.goals_conceded);
+    }
+};
+
+
+void Bundesliga::Sort_By_Goals_Scored()
+{
+
     /* We know that teams will be already grouped by points and goal difference. Now I need to sort clubs that have the same goal difference,
      * but more goals scored. */
 
@@ -487,29 +401,6 @@ void Bundesliga::Sort_By_Goals_Scored_Helper()
     }
     clubs = clubs_finished;
 
-}
-
-
-
-struct Points_GoalsDifference
-{
-    static bool Comparator(const Club_in_Table &club_1, const Club_in_Table &club_2)
-    {
-        return club_1.points == club_2.points &&
-                (club_1.goals_scored - club_1.goals_conceded) == (club_2.goals_scored - club_2.goals_conceded);
-    }
-};
-
-
-//I need to group teams that have the same points and goal differences. Rest of teams - I do not care.
-//So I can do vector of vectors. I will push iterators of clubs to those vectors
-//Each vector means: teams with same points and goal differences
-//After inserting teams, vectors with size 0 will be removed -
-// because it means those teams are unique, and do not need sorting. They are in good place in table (maybe only names bad, but its not for this func ;p)
-void Bundesliga::Sort_By_Goals_Scored() //This doesn't work properly.
-{
-
-    Sort_By_Goals_Scored_Helper();
 }
 
 
