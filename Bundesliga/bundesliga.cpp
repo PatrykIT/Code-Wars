@@ -167,6 +167,7 @@ std::string Bundesliga::table(std::vector<std::string> results)
     }
 
     Sort_Table();
+    Add_Positions();
 
     return Return_Final_Table();
 }
@@ -174,7 +175,51 @@ std::string Bundesliga::table(std::vector<std::string> results)
 
 std::string Bundesliga::Return_Final_Table()
 {
+    std::string final = "";
+    std::string line = "";
 
+    for(Club_in_Table &club : clubs)
+    {
+        line.append(std::to_string(club.position));
+        if(line.length() == 1)
+            line.insert(line.begin(), ' ');
+
+        line.append(". ");
+
+        int spaces_needed = 30 - club.name.length();
+        std::string fill_up (spaces_needed, ' ');
+        line.append(club.name + fill_up);
+
+        line.append(std::to_string(club.matches_played) + "  " + std::to_string(club.matches_won) + "  " +
+                    std::to_string(club.matches_drawn) + "  " + std::to_string(club.matches_lost));
+        line.append("  " + std::to_string(club.goals_scored) + ":" + std::to_string(club.goals_conceded));
+        line.append("  " + std::to_string(club.points) + "\n");
+
+        final.append(line);
+        line.clear();
+    }
+    std::cout << "\n\n\t\tFINAL: \n" << final << "\n";
+    return final;
+}
+
+void Bundesliga::Add_Positions()
+{
+    clubs.front().position = 1;
+    int position = 2;
+
+    for(auto club_iter = clubs.begin() +1; club_iter != clubs.end(); ++club_iter)
+    {
+        const Club_in_Table &club_before = *(club_iter -1);
+        if(Check_if_Identical_Everything(club_before, *club_iter) == true)
+        {
+            club_iter->position = club_before.position;
+        }
+        else
+        {
+            club_iter->position = position;
+        }
+        ++position;
+    }
 }
 
 

@@ -22,6 +22,8 @@ private:
     void Sort_By_Goals_Scored();
     void Sort_By_Name();
 
+    void Add_Positions();
+
     std::string Return_Final_Table();
 
 
@@ -53,6 +55,7 @@ struct Club_in_Table
     int matches_played = 0, matches_won = 0, matches_drawn = 0, matches_lost = 0;
     int goals_scored = 0, goals_conceded = 0;
     unsigned points = 0;
+    int position = -1;
 
 
     bool operator==(const Club_in_Table &club) const
