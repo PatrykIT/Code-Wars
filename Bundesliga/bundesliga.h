@@ -40,6 +40,7 @@ struct Club_in_Table
     int goals_scored = 0, goals_conceded = 0;
     unsigned points = 0;
 
+
     bool operator==(const Club_in_Table &club) const
     {
         return club.name == this->name;
@@ -92,7 +93,7 @@ struct Club_in_Table
     static bool Iterator_Based_Comparator_for_Clubs(const std::vector<Club_in_Table>::iterator &club_1,
                                                     const std::vector<Club_in_Table>::iterator &club_2)
     {
-        return false;
+        return club_1->name == club_2->name && club_1->points == club_2->points; //I should compare every attribute, but that should be okay.
     }
 
     static bool Comparator_For_Unique_Iterators(const Club_in_Table &club_1,
