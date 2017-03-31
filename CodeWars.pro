@@ -9,7 +9,8 @@ SOURCES += main.cpp \
     "Best_Travel/test_cases.cpp" \
     "Weight_for_Weight\Weight.cpp" \
     "Integers_Recreation_One\integers.cpp" \
-    Bundesliga\bundesliga.cpp
+    Bundesliga\bundesliga.cpp \
+    IsMyFriendCheating/ismyfriendcheating.cpp
 
 HEADERS += \
     Bundesliga\bundesliga.h
