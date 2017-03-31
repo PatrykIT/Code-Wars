@@ -10,7 +10,8 @@ SOURCES += main.cpp \
     "Weight_for_Weight\Weight.cpp" \
     "Integers_Recreation_One\integers.cpp" \
     Bundesliga\bundesliga.cpp \
-    IsMyFriendCheating/ismyfriendcheating.cpp
+    IsMyFriendCheating/ismyfriendcheating.cpp \
+    Convert_to_CamelCase/camelcase.cpp
 
 HEADERS += \
     Bundesliga\bundesliga.h
