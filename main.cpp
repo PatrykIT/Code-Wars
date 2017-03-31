@@ -2,7 +2,16 @@
 //#define BestTravel_usage
 //#define Weight_for_Weight
 //#define INTEGERS_RECREATION_ONE
-#define BUNDESLIGA
+//#define BUNDESLIGA
+#define CAR
+
+
+
+
+
+
+
+
 
 
 #ifdef BestTravel_usage
@@ -20,6 +29,14 @@
 
 #ifdef BUNDESLIGA
 #include "Bundesliga\bundesliga.h"
+#endif
+
+#ifdef IsMyFriendCheating
+#include "IsMyFriendCheating\ismyfriendcheating.cpp"
+#endif
+
+#ifdef CAR
+#include "Constructing_a_Car\Car.cpp"
 #endif
 
 using std::cout;
@@ -48,18 +65,34 @@ int main(int argc, char *argv[])
     std::cout << object.listSquared(1, 250) << std::endl;
 #endif
 
+#ifdef BUNDESLIGA
     Bundesliga table;
-    std::vector<std::string> results = {            "6:0 FC Bayern Muenchen - Werder Bremen",
-                                                    "1:0 Eintracht Frankfurt - Schalke 04",
-                                                    "0:2 FC Augsburg - VfL Wolfsburg",
-                                                    "1:1 Hamburger SV - FC Ingolstadt",
-                                                    "2:0 1. FC Koeln - SV Darmstadt",
-                                                    "2:1 Borussia Dortmund - FSV Mainz 05",
-                                                    "2:1 Borussia Moenchengladbach - Bayer Leverkusen",
-                                                    "2:0 AAertha BSC Berlin - SC Freiburg",
-                                                    "-:- TSG 1899 Hoffenheim - RasenBall Leipzig"
+    std::vector<std::string> results = {    "6:0 FC Bayern Muenchen - Werder Bremen",
+                                            "1:0 Eintracht Frankfurt - Schalke 04",
+                                            "0:2 FC Augsburg - VfL Wolfsburg",
+                                            "1:1 Hamburger SV - FC Ingolstadt",
+                                            "2:0 1. FC Koeln - SV Darmstadt",
+                                            "2:1 Borussia Dortmund - FSV Mainz 05",
+                                            "2:1 Borussia Moenchengladbach - Bayer Leverkusen",
+                                            "-:- Hertha BSC Berlin - SC Freiburg",
+                                            "-:- TSG 1899 Hoffenheim - RasenBall Leipzig"
                                        };
-    table.table(results);
 
+//    std::vector<std::string> results = {            "2:0 AReal Madrit - Sevilla",
+//                                                    "2:0 Zeicester - Atletico Madrid",
+//                                                    "5:1 Tottenham - PSG",
+//                                                    "2:0 Barcelona - Chelsea"
+//                                       };
+//    std::vector<std::string> results = {    "3:2 Barcelona - Chelsea",
+//                                            "1:0 FC Bayern Muenchen - Werder Bremen",
+//                                            "2:1 Tottenham - PSG",
+//                                       };
+
+    table.table(results);
+#endif
+
+#ifdef CAR
+    Car car;
+#endif
     return 0;
 }

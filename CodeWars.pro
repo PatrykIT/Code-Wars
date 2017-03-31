@@ -11,7 +11,8 @@ SOURCES += main.cpp \
     "Integers_Recreation_One\integers.cpp" \
     Bundesliga\bundesliga.cpp \
     IsMyFriendCheating/ismyfriendcheating.cpp \
-    Convert_to_CamelCase/camelcase.cpp
+    Convert_to_CamelCase/camelcase.cpp \
+    Constructing_a_Car/car.cpp
 
 HEADERS += \
     Bundesliga\bundesliga.h
