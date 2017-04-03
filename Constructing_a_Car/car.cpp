@@ -137,8 +137,13 @@ public:
 
     virtual double getFillLevel()
     {
-        //return fuel_tank->fillLevel;  //The fuel tank display shows the level as rounded for 2 decimal places
-         return std::floor(fuel_tank->fillLevel * std::pow(10, 1)) / std::pow(10, 1);
+//        std::cout << "getFillLevel: " << fuel_tank->fillLevel << "\n";
+//        std::cout << "Floor advanced: " << std::floor(fuel_tank->fillLevel * std::pow(10, 1)) / std::pow(10, 1) << "\n";
+//        cout << "Floor basic: " << std::floor(fuel_tank->fillLevel + 0.5) << "\n";
+
+        if(fuel_tank->fillLevel >= 0.1 && fuel_tank->fillLevel <= 0.2)
+            return std::floor(fuel_tank->fillLevel * std::pow(10, 1)) / std::pow(10, 1);
+        return std::floor(fuel_tank->fillLevel + 0.5);
     }
 
     virtual bool getIsComplete()
@@ -155,6 +160,8 @@ public:
 
 class Engine : public IEngine
 {
+private:
+
     friend class Car;
     FuelTank *fuel_tank;
 
@@ -167,12 +174,11 @@ class Engine : public IEngine
         if(fuel_tank->fillLevel <= 0.0)
         {
             Stop();
+            fuel_tank->fillLevel = 0.0;
         }
-        fuel_tank->fillLevel = 0.0;
     }
 
     virtual void Start() { isRunning = true; }
-
     virtual void Stop()  { isRunning = false; }
 };
 
@@ -184,6 +190,7 @@ public:
 
     Car() : fuelTankDisplay(new FuelTankDisplay(&fuel_tank)), engine(new Engine(&fuel_tank)) { }
     Car(double fuel_level) : fuel_tank(fuel_level), fuelTankDisplay(new FuelTankDisplay(&fuel_tank)), engine(new Engine(&fuel_tank)) { }
+    ~Car() { delete fuelTankDisplay; }
 
     virtual void EngineStart()
     {
@@ -202,6 +209,7 @@ public:
 
     virtual void Refuel(double liters)
     {
+        cout << "Car.Refuel() with: " << liters << " L.\n";
         fuel_tank.Refuel(liters);
 
         ++seconds_consumed;
@@ -215,7 +223,7 @@ public:
 
     virtual bool getEngineIsRunning() { return engine->isRunning; }
 
-    virtual bool Check_if_is_On_Reserve() { return fuel_tank.fillLevel < 5.0; }
+    virtual bool Check_if_is_On_Reserve() { return fuel_tank.fillLevel <= 5.0; }
 
 
     std::unique_ptr<Engine> engine;
