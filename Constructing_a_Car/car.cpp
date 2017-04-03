@@ -80,23 +80,14 @@ protected:
 
 
 #include <memory>
+#include <cmath>
 
-class Engine : public IEngine
-{
-    friend class Car;
-
-    Engine() { isRunning = false; }
-    virtual void Consume(double liters) { }
-
-    virtual void Start() { isRunning = true; }
-
-    virtual void Stop()  { isRunning = false; }
-};
 
 class FuelTank : public IFuelTank
 {
     friend class Car;
     friend class FuelTankDisplay;
+    friend class Engine;
 
     double maximum_size_of_tank = 60.0;
     double reserve_limit = 5.0;
@@ -104,11 +95,23 @@ class FuelTank : public IFuelTank
 public:
 
     FuelTank() { fillLevel = 20.0; }
-    FuelTank(double fuel_level) { fillLevel = fuel_level; }
+    FuelTank(double fuel_level)
+    {
+        if(fillLevel >= 0.0 && fillLevel <= maximum_size_of_tank)
+            fillLevel = fuel_level;
+    }
 
-    virtual void Consume(double liters) { fillLevel -= liters; }
+    virtual void Consume(double liters) { fillLevel -= liters; if(fillLevel < 0.0) fillLevel = 0.0; }
 
-    virtual void Refuel(double liters) { }
+    virtual void Refuel(double liters)
+    {
+        if(liters >= 0.0)
+        {
+            fillLevel += liters;
+            if(fillLevel > maximum_size_of_tank)
+                fillLevel = maximum_size_of_tank;
+        }
+    }
 };
 
 
@@ -120,7 +123,11 @@ class FuelTankDisplay : public IFuelTankDisplay
 public:
     FuelTankDisplay(FuelTank *fuel) : fuel_tank(fuel) { }
 
-    virtual double getFillLevel() { return fuel_tank->fillLevel; }
+    virtual double getFillLevel()
+    {
+        //return fuel_tank->fillLevel;  //The fuel tank display shows the level as rounded for 2 decimal places
+         return std::floor(fuel_tank->fillLevel * std::pow(10, 1)) / std::pow(10, 1);
+    }
 
     virtual bool getIsComplete()
     {
@@ -134,7 +141,28 @@ public:
 };
 
 
+class Engine : public IEngine
+{
+    friend class Car;
+    FuelTank *fuel_tank;
 
+
+    Engine(FuelTank *_fuel_tank) : fuel_tank(_fuel_tank) { isRunning = false; }
+
+    virtual void Consume(double liters)
+    {
+        fuel_tank->fillLevel -= liters;
+        if(fuel_tank->fillLevel <= 0)
+        {
+            Stop();
+        }
+        fuel_tank->fillLevel = 0;
+    }
+
+    virtual void Start() { isRunning = true; }
+
+    virtual void Stop()  { isRunning = false; }
+};
 
 
 
@@ -142,12 +170,13 @@ class Car : public ICar
 {
 public:
 
-    Car() : engine(new Engine), fuelTankDisplay(new FuelTankDisplay(&fuel_tank)) { }
-    Car(double fuel_level) : engine(new Engine), fuel_tank(fuel_level), fuelTankDisplay(new FuelTankDisplay(&fuel_tank)) { }
+    Car() : fuelTankDisplay(new FuelTankDisplay(&fuel_tank)), engine(new Engine(&fuel_tank)) { }
+    Car(double fuel_level) : fuel_tank(fuel_level), fuelTankDisplay(new FuelTankDisplay(&fuel_tank)), engine(new Engine(&fuel_tank)) { }
 
     virtual void EngineStart()
     {
-        engine->Start();
+        if(fuel_tank.fillLevel > 0)
+            engine->Start();
 
         ++seconds_consumed;
     }
@@ -161,14 +190,14 @@ public:
 
     virtual void Refuel(double liters)
     {
-        fuel_tank.fillLevel += liters;
+        fuel_tank.Refuel(liters);
 
         ++seconds_consumed;
     }
 
     virtual void RunningIdle()
     {   /* The fuel consumption in running idle is 0.0003 liter/second. */
-        fuel_tank.Consume(0.0003);
+        engine->Consume(0.0003);
     }
 
     virtual bool getEngineIsRunning() { return engine->isRunning; }
@@ -176,11 +205,9 @@ public:
     virtual bool Check_if_is_On_Reserve() { return fuel_tank.fillLevel < 5.0; }
 
 
-    //Engine engine;
     std::unique_ptr<Engine> engine;
 
     FuelTank fuel_tank;
-    //FuelTankDisplay fuelTankDisplay;
     FuelTankDisplay *fuelTankDisplay; //Change to shared pointer
 
     double seconds_consumed = 0;
