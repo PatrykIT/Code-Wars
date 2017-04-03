@@ -165,20 +165,24 @@ private:
     friend class Car;
     FuelTank *fuel_tank;
 
-
     Engine(FuelTank *_fuel_tank) : fuel_tank(_fuel_tank) { isRunning = false; }
 
     virtual void Consume(double liters)
     {
-        fuel_tank->fillLevel -= liters;
-        if(fuel_tank->fillLevel <= 0.0)
+        if(isRunning)
         {
-            Stop();
-            fuel_tank->fillLevel = 0.0;
+            fuel_tank->Consume(liters);
+            if(fuel_tank->fillLevel <= 0.0)
+                Stop();
         }
     }
 
-    virtual void Start() { isRunning = true; }
+    virtual void Start()
+    {
+        if(fuel_tank->fillLevel > 0.0)
+            isRunning = true;
+    }
+
     virtual void Stop()  { isRunning = false; }
 };
 
@@ -188,14 +192,12 @@ class Car : public ICar
 {
 public:
 
-    Car() : fuelTankDisplay(new FuelTankDisplay(&fuel_tank)), engine(new Engine(&fuel_tank)) { }
-    Car(double fuel_level) : fuel_tank(fuel_level), fuelTankDisplay(new FuelTankDisplay(&fuel_tank)), engine(new Engine(&fuel_tank)) { }
-    ~Car() { delete fuelTankDisplay; }
+    Car() : engine(new Engine(&fuel_tank)) { }
+    Car(double fuel_level) : fuel_tank(fuel_level), engine(new Engine(&fuel_tank)) { }
 
     virtual void EngineStart()
     {
-        if(fuel_tank.fillLevel > 0.0)
-            engine->Start();
+        engine->Start();
 
         ++seconds_consumed;
     }
@@ -217,8 +219,7 @@ public:
 
     virtual void RunningIdle()
     {   /* The fuel consumption in running idle is 0.0003 liter/second. */
-        if(engine->isRunning)
-            engine->Consume(0.0003);
+        engine->Consume(0.0003);
     }
 
     virtual bool getEngineIsRunning() { return engine->isRunning; }
@@ -226,10 +227,9 @@ public:
     virtual bool Check_if_is_On_Reserve() { return fuel_tank.fillLevel <= 5.0; }
 
 
-    std::unique_ptr<Engine> engine;
-
     FuelTank fuel_tank;
-    FuelTankDisplay *fuelTankDisplay; //Change to shared pointer
+    std::unique_ptr<Engine> engine;
+    std::unique_ptr<FuelTankDisplay> fuelTankDisplay = std::make_unique<FuelTankDisplay>(&fuel_tank);
 
     double seconds_consumed = 0;
 };
