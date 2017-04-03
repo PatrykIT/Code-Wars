@@ -81,6 +81,8 @@ protected:
 
 #include <memory>
 #include <cmath>
+#include <iostream>
+using std::cout;
 
 
 class FuelTank : public IFuelTank
@@ -97,11 +99,21 @@ public:
     FuelTank() { fillLevel = 20.0; }
     FuelTank(double fuel_level)
     {
-        if(fillLevel >= 0.0 && fillLevel <= maximum_size_of_tank)
+        cout << "Constructor of fuel tank: " << fuel_level << "\n";
+        if(fuel_level <= 0.0)
+            fillLevel = 0.0;
+        else if(fuel_level >= maximum_size_of_tank)
+            fillLevel = maximum_size_of_tank;
+        else
             fillLevel = fuel_level;
     }
 
-    virtual void Consume(double liters) { fillLevel -= liters; if(fillLevel < 0.0) fillLevel = 0.0; }
+    virtual void Consume(double liters)
+    {
+        fillLevel -= liters;
+        if(fillLevel < 0.0)
+            fillLevel = 0.0;
+    }
 
     virtual void Refuel(double liters)
     {
@@ -152,11 +164,11 @@ class Engine : public IEngine
     virtual void Consume(double liters)
     {
         fuel_tank->fillLevel -= liters;
-        if(fuel_tank->fillLevel <= 0)
+        if(fuel_tank->fillLevel <= 0.0)
         {
             Stop();
         }
-        fuel_tank->fillLevel = 0;
+        fuel_tank->fillLevel = 0.0;
     }
 
     virtual void Start() { isRunning = true; }
@@ -175,7 +187,7 @@ public:
 
     virtual void EngineStart()
     {
-        if(fuel_tank.fillLevel > 0)
+        if(fuel_tank.fillLevel > 0.0)
             engine->Start();
 
         ++seconds_consumed;
@@ -197,7 +209,8 @@ public:
 
     virtual void RunningIdle()
     {   /* The fuel consumption in running idle is 0.0003 liter/second. */
-        engine->Consume(0.0003);
+        if(engine->isRunning)
+            engine->Consume(0.0003);
     }
 
     virtual bool getEngineIsRunning() { return engine->isRunning; }
