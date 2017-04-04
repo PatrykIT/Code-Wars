@@ -12,7 +12,9 @@ SOURCES += main.cpp \
     Bundesliga\bundesliga.cpp \
     IsMyFriendCheating/ismyfriendcheating.cpp \
     Convert_to_CamelCase/camelcase.cpp \
-    Constructing_a_Car/car.cpp
+    Constructing_a_Car/car.cpp \
+    Perfect_Tree/is_perfect.cpp \
+    Histogram/histogram.cpp
 
 HEADERS += \
     Bundesliga\bundesliga.h

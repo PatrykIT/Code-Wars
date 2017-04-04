@@ -1,9 +1,12 @@
 #include <iostream>
+
 //#define BestTravel_usage
 //#define Weight_for_Weight
 //#define INTEGERS_RECREATION_ONE
 //#define BUNDESLIGA
-#define CAR
+//#define CAR
+//#define PERFECT_TREE
+#define HISTOGRAM
 
 
 
@@ -39,8 +42,13 @@
 #include "Constructing_a_Car\Car.cpp"
 #endif
 
-using std::cout;
-using std::endl;
+#ifdef PERFECT_TREE
+#include "Perfect_Tree/is_perfect.cpp"
+#endif
+
+#ifdef HISTOGRAM
+#include "Histogram/histogram.cpp"
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -94,5 +102,30 @@ int main(int argc, char *argv[])
 #ifdef CAR
     Car car;
 #endif
+
+#ifdef PERFECT_TREE
+    TreeNode node;
+#endif
+
+#ifdef HISTOGRAM
+    std::cout << histogram({7, 3, 10, 1, 0, 5}) << std::endl << "\n";
+
+    std::string expected = "    10\n"
+                           "    #\n"
+                           "    #\n"
+                           "7   #\n"
+                           "#   #\n"
+                           "#   #     5\n"
+                           "#   #     #\n"
+                           "# 3 #     #\n"
+                           "# # #     #\n"
+                           "# # # 1   #\n"
+                           "# # # #   #\n"
+                           "-----------\n"
+                           "1 2 3 4 5 6\n";
+
+    std::cout << expected << std::endl;
+#endif
+
     return 0;
 }
