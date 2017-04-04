@@ -30,7 +30,8 @@ void Fill_Empty_Lines(std::vector<size_t> &indexes_that_need_hash, int biggest_n
     }
 }
 
-void Add_Line_with_Number(std::vector<size_t> &indexes_that_need_hash, int current_biggest_number, std::vector<int> &results_numbers, std::string &result)
+void Add_Line_with_Number(std::vector<size_t> &indexes_that_need_hash, int current_biggest_number,
+                          std::vector<int> &results_numbers, std::string &result)
 {
     size_t iterate_up_to_index = *std::max_element(indexes_that_need_hash.begin(),
                                                    indexes_that_need_hash.end());
@@ -62,11 +63,16 @@ void Add_Line_with_Number(std::vector<size_t> &indexes_that_need_hash, int curre
     result.append("\n");
 }
 
+std::vector<int>::iterator Find_Max(std::vector<int> &results_numbers, std::vector<int> &numbers_analyzed)
+{
+
+}
 
 std::string histogram(std::vector<int> results_numbers)
 {
     std::string result = "";
     std::vector<size_t> indexes_that_need_hash;
+    std::vector<int> numbers_analyzed;
 
     /* Putting biggest number */
     std::vector<int>::iterator biggest_number_iterator = std::max_element(results_numbers.begin(), results_numbers.end());
@@ -79,25 +85,31 @@ std::string histogram(std::vector<int> results_numbers)
         result.push_back(' ');
     }
     result.insert(index_of_biggest_number, std::to_string(biggest_number) + "\n");
+    numbers_analyzed.push_back(biggest_number);
 
 
     /* Putting rest of numbers */
-
 
 
     /* The problem is that I delete elements, and indexes change places.
      * I could make a copy of vector and take biggest number from the false one and then delete this number,
      * and take indexes from original vector.
      *
-     * That is good, but let's think of something that doesn't involve creating a second vector. */
-    while(!results_numbers.empty())
+     * I need to write a function that finds maximum element, but ignoring bigger elements that were already checked.
+     */
+
+    int numbers_analyzed_counter = 1; //Because first element is done at the top.
+    while(numbers_analyzed_counter != results_numbers.size())
     {
         int last_biggest_number = biggest_number;
-        results_numbers.erase(biggest_number_iterator);
 
-        biggest_number_iterator = std::max_element(results_numbers.begin(), results_numbers.end());
-        biggest_number = *biggest_number_iterator;
-        index_of_biggest_number = std::distance(results_numbers.begin(), biggest_number_iterator);
+//        biggest_number_iterator = std::max_element(results_numbers.begin(), results_numbers.end());
+//        biggest_number = *biggest_number_iterator;
+//        index_of_biggest_number = std::distance(results_numbers.begin(), biggest_number_iterator);
+        biggest_number_iterator = Find_Max(results_numbers, numbers_analyzed);
+        /* CONTINUE HERE */
+
+
 
         Fill_Empty_Lines(indexes_that_need_hash, biggest_number, last_biggest_number, result);
 
@@ -106,19 +118,7 @@ std::string histogram(std::vector<int> results_numbers)
 
         Add_Line_with_Number(indexes_that_need_hash, biggest_number, results_numbers, result);
 
-//        size_t iterate_up_to_index = *std::max_element(indexes_that_need_hash.begin(), indexes_that_need_hash.end());
-
-//        /* This loop iterates one single line, and marks each place on this line as # or space. */
-//        for(size_t index = 0; index < iterate_up_to_index; ++index)
-//        {
-//            /* Check if given index in string should be marked as # or space. */
-//            auto found = std::find(indexes_that_need_hash.begin(), indexes_that_need_hash.end(), index);
-//            if(found != indexes_that_need_hash.end())
-//                result.push_back('#');
-//            else
-//                result.push_back(' ');
-//        }
-//        result.append("\n");
+        ++numbers_analyzed_counter;
     }
 
 
