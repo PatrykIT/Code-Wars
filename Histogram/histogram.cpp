@@ -36,7 +36,7 @@ void Add_Line_with_Number(std::vector<size_t> &indexes_that_need_hash, int curre
     size_t iterate_up_to_index = *std::max_element(indexes_that_need_hash.begin(),
                                                    indexes_that_need_hash.end());
 
-    std::cout << "I will iterate until: " << iterate_up_to_index << "\n";
+    //std::cout << "I will iterate until: " << iterate_up_to_index << "\n";
     bool biggest_number_saved = false;
 
     /* This loop iterates one single line, and marks each place on this line as # or space. */
@@ -104,6 +104,9 @@ std::vector<int>::iterator Find_Max(std::vector<int> &results_numbers, std::vect
 
 std::string histogram(std::vector<int> results_numbers)
 {
+    std::cout << "Size of: " << results_numbers.size() << std::endl;
+    for(auto nr : results_numbers)
+        std::cout << nr << " ";
     std::string result = "";
 
     int biggest_number;
@@ -113,6 +116,7 @@ std::string histogram(std::vector<int> results_numbers)
     std::vector<int>::iterator biggest_number_iterator;
     std::vector<size_t> indexes_that_need_hash;
     std::vector<int> numbers_analyzed;
+
 
     /* Put biggest number */
     biggest_number_iterator = Find_Max(results_numbers, numbers_analyzed);
@@ -144,9 +148,9 @@ std::string histogram(std::vector<int> results_numbers)
             indexes_that_need_hash.push_back(index_of_biggest_number);
 
             Add_Line_with_Number(indexes_that_need_hash, biggest_number, results_numbers, result);
-
-            ++numbers_analyzed_counter;
         }
+
+        ++numbers_analyzed_counter;
     }
 
 
