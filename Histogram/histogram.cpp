@@ -41,10 +41,11 @@ void Fill_Empty_Lines(std::vector<size_t> &indexes_that_need_hash, int biggest_n
     }
 }
 
-/* This function should find all repeating numbers of "current_biggest_number", add them to indexes_that_needed_hash,
- * set maps occurences to 0 */
+/* This function should finds all repeating numbers of "current_biggest_number", adds them to indexes_that_needed_hash and
+ * set maps occurences to 0. */
 void Find_All_Max_Repeating_Elements(std::vector<size_t> &indexes_that_need_hash, int current_biggest_number,
-                                     std::vector<int> &results_numbers, std::string &result, std::map<int, int> &repeating_numbers)
+                                     std::vector<int> &results_numbers, std::string &result,
+                                     std::map<int, int> &repeating_numbers, size_t &numbers_analyzed_counter)
 {
     int index_of_biggest_number;
 
@@ -58,19 +59,20 @@ void Find_All_Max_Repeating_Elements(std::vector<size_t> &indexes_that_need_hash
         indexes_that_need_hash.push_back(index_of_biggest_number);
         /* Remove from map. */
         repeating_numbers.at(current_biggest_number) -= 1;
+        ++numbers_analyzed_counter;
 
         element = Find_Repeating_Not_Used_Element_Index(current_biggest_number,
                                                         results_numbers, indexes_that_need_hash);
     }
 }
 
-
-/* This function should find all repeating numbers of "current_biggest_number", add them to indexes_that_needed_hash,
- * set maps occurences to 0 and do its job then. ;) */
-void Add_Line_with_Number(std::vector<size_t> &indexes_that_need_hash, int current_biggest_number,
-                          std::vector<int> &results_numbers, std::string &result, std::map<int, int> &repeating_numbers)
+void Add_Line_with_Numbers(std::vector<size_t> &indexes_that_need_hash, int current_biggest_number,
+                          std::vector<int> &results_numbers, std::string &result,
+                          std::map<int, int> &repeating_numbers, size_t &numbers_analyzed_counter)
 {
-    Find_All_Max_Repeating_Elements(indexes_that_need_hash, current_biggest_number, results_numbers, result, repeating_numbers);
+    /* Thanks to this function, we will be able to add all repeating numbers in one line. */
+    Find_All_Max_Repeating_Elements(indexes_that_need_hash, current_biggest_number,
+                                    results_numbers, result, repeating_numbers, numbers_analyzed_counter);
 
     size_t iterate_up_to_index = *std::max_element(indexes_that_need_hash.begin(),
                                                    indexes_that_need_hash.end());
@@ -97,7 +99,9 @@ void Add_Line_with_Number(std::vector<size_t> &indexes_that_need_hash, int curre
                 biggest_number_saved = true;
             }
             else
+            {
                 result.append("# ");
+            }
         }
         else
             result.append("  ");
@@ -186,22 +190,27 @@ std::string histogram(std::vector<int> results_numbers)
         repeating_numbers[number]++;
 
 
+    size_t numbers_analyzed_counter = 0;
+
     /* Put biggest number */
-    biggest_number_iterator = Find_Max(results_numbers, numbers_analyzed, repeating_numbers, indexes_that_need_hash);
+    biggest_number_iterator = Find_Max(results_numbers, numbers_analyzed,
+                                       repeating_numbers, indexes_that_need_hash);
     biggest_number = *biggest_number_iterator;
     index_of_biggest_number = std::distance(results_numbers.begin(), biggest_number_iterator);
     indexes_that_need_hash.push_back(index_of_biggest_number);
-    Add_Line_with_Number(indexes_that_need_hash, biggest_number, results_numbers, result, repeating_numbers);
+    Add_Line_with_Numbers(indexes_that_need_hash, biggest_number, results_numbers, result,
+                         repeating_numbers, numbers_analyzed_counter);
     numbers_analyzed.push_back(biggest_number);
 
 
     /* Put rest of numbers */
-    size_t numbers_analyzed_counter = 1; //Because first element is done at the top.
+
     while(numbers_analyzed_counter != results_numbers.size())
     {
         last_biggest_number = biggest_number;
 
-        biggest_number_iterator = Find_Max(results_numbers, numbers_analyzed, repeating_numbers, indexes_that_need_hash);
+        biggest_number_iterator = Find_Max(results_numbers, numbers_analyzed,
+                                           repeating_numbers, indexes_that_need_hash);
 
         if(biggest_number_iterator != results_numbers.end())
         {
@@ -216,7 +225,8 @@ std::string histogram(std::vector<int> results_numbers)
 
             /* Here I repeat this 3 times for 7, thats why it grows. I should call it once, and it would save all 7's.
              * That would be correct, because repeating numbers need to be on the same line. */
-            Add_Line_with_Number(indexes_that_need_hash, biggest_number, results_numbers, result, repeating_numbers);
+            Add_Line_with_Numbers(indexes_that_need_hash, biggest_number, results_numbers, result,
+                                 repeating_numbers, numbers_analyzed_counter);
         }
 
         ++numbers_analyzed_counter;
@@ -227,6 +237,8 @@ std::string histogram(std::vector<int> results_numbers)
     {
         Fill_Empty_Lines(indexes_that_need_hash, 0, last_biggest_number, result);
     }
+
+    //If all numbers are 0, erase whole line.
 
 
 
