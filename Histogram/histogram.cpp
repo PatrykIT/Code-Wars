@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <map>
 
+std::vector<int>::iterator Find_Repeating_Not_Used_Element_Index(int number, std::vector<int> &results_numbers,
+                                                                 std::vector<size_t> &indexes_that_need_hash);
+
+
 void Fill_Empty_Lines(std::vector<size_t> &indexes_that_need_hash, int biggest_number, int last_biggest_number,
                       std::string &result)
 {
@@ -37,9 +41,37 @@ void Fill_Empty_Lines(std::vector<size_t> &indexes_that_need_hash, int biggest_n
     }
 }
 
+/* This function should find all repeating numbers of "current_biggest_number", add them to indexes_that_needed_hash,
+ * set maps occurences to 0 */
+void Find_All_Max_Repeating_Elements(std::vector<size_t> &indexes_that_need_hash, int current_biggest_number,
+                                     std::vector<int> &results_numbers, std::string &result, std::map<int, int> &repeating_numbers)
+{
+    int index_of_biggest_number;
+
+    std::vector<int>::iterator element = Find_Repeating_Not_Used_Element_Index(current_biggest_number,
+                                                                               results_numbers, indexes_that_need_hash);
+
+    while(element != results_numbers.end())
+    {
+        index_of_biggest_number = std::distance(results_numbers.begin(), element);
+        /* Add indexes. */
+        indexes_that_need_hash.push_back(index_of_biggest_number);
+        /* Remove from map. */
+        repeating_numbers.at(current_biggest_number) -= 1;
+
+        element = Find_Repeating_Not_Used_Element_Index(current_biggest_number,
+                                                        results_numbers, indexes_that_need_hash);
+    }
+}
+
+
+/* This function should find all repeating numbers of "current_biggest_number", add them to indexes_that_needed_hash,
+ * set maps occurences to 0 and do its job then. ;) */
 void Add_Line_with_Number(std::vector<size_t> &indexes_that_need_hash, int current_biggest_number,
                           std::vector<int> &results_numbers, std::string &result, std::map<int, int> &repeating_numbers)
 {
+    Find_All_Max_Repeating_Elements(indexes_that_need_hash, current_biggest_number, results_numbers, result, repeating_numbers);
+
     size_t iterate_up_to_index = *std::max_element(indexes_that_need_hash.begin(),
                                                    indexes_that_need_hash.end());
 
@@ -82,6 +114,7 @@ std::vector<int>::iterator Find_Repeating_Not_Used_Element_Index(int number, std
         if(*iter == number)
         {
             size_t index_of_iterator = std::distance(results_numbers.begin(), iter);
+            /* If the index was not yet used. */
             if(std::find(indexes_that_need_hash.begin(), indexes_that_need_hash.end(), index_of_iterator)
                     == indexes_that_need_hash.end())
             {
@@ -136,9 +169,6 @@ std::vector<int>::iterator Find_Max(std::vector<int> &results_numbers, std::vect
 
 std::string histogram(std::vector<int> results_numbers)
 {
-//    std::cout << "Size of: " << results_numbers.size() << std::endl;
-//    for(auto nr : results_numbers)
-//        std::cout << nr << " "; std::cout << "\n";
     std::string result = "";
 
     int biggest_number;
