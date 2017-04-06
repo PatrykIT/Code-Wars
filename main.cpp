@@ -108,23 +108,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef HISTOGRAM
-    std::cout << histogram({7, 3, 10, 1, 0, 5}) << std::endl << "\n";
-
-    std::string expected = "    10\n"
-                           "    #\n"
-                           "    #\n"
-                           "7   #\n"
-                           "#   #\n"
-                           "#   #     5\n"
-                           "#   #     #\n"
-                           "# 3 #     #\n"
-                           "# # #     #\n"
-                           "# # # 1   #\n"
-                           "# # # #   #\n"
-                           "-----------\n"
-                           "1 2 3 4 5 6\n";
-
-    std::cout << expected << std::endl;
+    std::string result = histogram({7, 3, 10, 1, 0, 5});
 #endif
 
     return 0;

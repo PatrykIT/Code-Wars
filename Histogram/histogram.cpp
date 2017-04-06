@@ -1,3 +1,5 @@
+//https://www.codewars.com/kata/histogram-v1/train/cpp
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -41,7 +43,7 @@ void Fill_Empty_Lines(std::vector<size_t> &indexes_that_need_hash, int biggest_n
     }
 }
 
-/* This function should finds all repeating numbers of "current_biggest_number", adds them to indexes_that_needed_hash and
+/* This function finds all repeating numbers of "current_biggest_number", adds them to indexes_that_needed_hash and
  * set maps occurences to 0. */
 void Find_All_Max_Repeating_Elements(std::vector<size_t> &indexes_that_need_hash, int current_biggest_number,
                                      std::vector<int> &results_numbers, std::string &result,
@@ -64,6 +66,11 @@ void Find_All_Max_Repeating_Elements(std::vector<size_t> &indexes_that_need_hash
         element = Find_Repeating_Not_Used_Element_Index(current_biggest_number,
                                                         results_numbers, indexes_that_need_hash);
     }
+}
+
+bool Is_a_Single_Digit(int number)
+{
+    return(number < 10);
 }
 
 void Add_Line_with_Numbers(std::vector<size_t> &indexes_that_need_hash, int current_biggest_number,
@@ -92,9 +99,20 @@ void Add_Line_with_Numbers(std::vector<size_t> &indexes_that_need_hash, int curr
             if(results_numbers.at(*found) == current_biggest_number /*&& biggest_number_saved == false*/)
             {
                 if(current_biggest_number != 0)
-                    result.append(std::to_string(current_biggest_number) +' ');
+                {
+                    if(Is_a_Single_Digit(current_biggest_number))
+                    {
+                        result.append(std::to_string(current_biggest_number) +' ');
+                    }
+                    else
+                    {
+                        result.append(std::to_string(current_biggest_number));
+                    }
+                }
                 else
+                {
                     result.append("  ");
+                }
 
                 biggest_number_saved = true;
             }
@@ -107,7 +125,11 @@ void Add_Line_with_Numbers(std::vector<size_t> &indexes_that_need_hash, int curr
             result.append("  ");
     }
 
-    result.back() = '\n';
+    /* Take care not to overwrite a number (might happen if number is multi-digit). */
+    if(std::isdigit(result.back()))
+        result.push_back('\n');
+    else
+        result.back() = '\n';
 }
 
 std::vector<int>::iterator Find_Repeating_Not_Used_Element_Index(int number, std::vector<int> &results_numbers,
@@ -204,7 +226,6 @@ std::string histogram(std::vector<int> results_numbers)
 
 
     /* Put rest of numbers */
-
     while(numbers_analyzed_counter != results_numbers.size())
     {
         last_biggest_number = biggest_number;
@@ -235,12 +256,14 @@ std::string histogram(std::vector<int> results_numbers)
     /* If there was no 0 number, we have to call function again so that it would fill # up until 0. */
     if(std::find(results_numbers.begin(), results_numbers.end(), 0) == results_numbers.end())
     {
-        Fill_Empty_Lines(indexes_that_need_hash, 0, last_biggest_number, result);
+        Fill_Empty_Lines(indexes_that_need_hash, -1, last_biggest_number, result);
     }
 
     //If all numbers are 0, erase whole line.
-
-
+    if(std::all_of(results_numbers.begin(), results_numbers.end(), [](const int number) { return number == 0; }))
+    {
+        result.clear();
+    }
 
     result.append("-----------\n");
     result.append("1 2 3 4 5 6\n");
