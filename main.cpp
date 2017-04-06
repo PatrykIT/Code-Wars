@@ -6,8 +6,8 @@
 //#define BUNDESLIGA
 //#define CAR
 //#define PERFECT_TREE
-#define HISTOGRAM
-
+//#define HISTOGRAM
+#define VALID_BRACES
 
 
 
@@ -50,6 +50,10 @@
 #include "Histogram/histogram.cpp"
 #endif
 
+#ifdef VALID_BRACES
+#include "Valid_Braces/valid_braces.cpp"
+#endif
+
 int main(int argc, char *argv[])
 {
 #ifdef BestTravel_usage
@@ -65,8 +69,6 @@ int main(int argc, char *argv[])
     //std::vector<int> comparator {180, 90};
     //xx.Reorder_Repeating_Weights(comparator);
 #endif
-
-    bool bigger = std::string {"90"} < std::string {"180"}; //Check narrowing!
 
 #ifdef INTEGERS_RECREATION_ONE
     SumSquaredDivisors object;
@@ -109,6 +111,10 @@ int main(int argc, char *argv[])
 
 #ifdef HISTOGRAM
     std::string result = histogram({7, 3, 10, 1, 0, 5});
+#endif
+
+#ifdef VALID_BRACES
+    valid_braces({"2AAA"});
 #endif
 
     return 0;

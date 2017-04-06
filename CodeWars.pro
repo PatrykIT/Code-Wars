@@ -14,7 +14,8 @@ SOURCES += main.cpp \
     Convert_to_CamelCase/camelcase.cpp \
     Constructing_a_Car/car.cpp \
     Perfect_Tree/is_perfect.cpp \
-    Histogram/histogram.cpp
+    Histogram/histogram.cpp \
+    Valid_Braces/valid_braces.cpp
 
 HEADERS += \
     Bundesliga\bundesliga.h
