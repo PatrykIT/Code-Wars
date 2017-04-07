@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef VALID_BRACES
-    valid_braces({"2AAA"});
+    bool is_true = valid_braces({"(){}[]"});
 #endif
 
     return 0;
