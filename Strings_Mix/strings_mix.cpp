@@ -53,12 +53,10 @@ public:
             result.push_back(letter);
     }
 
-    static bool Is_Empty(std::string &result, std::map<int, char> &first_string_counter_sorted,
+    static bool Is_One_String_Completed(std::string &result, std::map<int, char> &first_string_counter_sorted,
                           std::map<int, char> &second_string_counter_sorted, const int max_occurences_one, const int max_occurences_two)
     {
-        if(max_occurences_one == -1 && max_occurences_two == -1)
-            return true;
-        else if(max_occurences_one == -1) //Means second string is not empty yet.
+        if(max_occurences_one == -1) //Means second string is not empty yet.
         {
             result.append("2:");
             Add_Letter_N_times(result, second_string_counter_sorted.at(max_occurences_two), max_occurences_two);
@@ -83,41 +81,57 @@ public:
     static void Put_Elements(std::string &result, std::map<int, char> &first_string_counter_sorted,
                              std::map<int, char> &second_string_counter_sorted)
     {
-        auto max_occurence = std::max_element(first_string_counter_sorted.begin(), first_string_counter_sorted.end());
-        int max_occurences_one = max_occurence->first;
+        /* TO FIX: first_string_counter_sorted.at(max_occurences_one) = -1
+         * ALL THOSE LINES ARE BAD! I DO NOT OVERWRITE INT, I OVERWRITE CHAR.
+         * Logic must be refactored for possibility of overwirting ints and creating new maps based on it.
+         * Or maybe just creating new maps after adding each element. We'll see on Monday ;) */
 
-        max_occurence = std::max_element(second_string_counter_sorted.begin(), second_string_counter_sorted.end());
-        int max_occurences_two  = max_occurence->first;
+        while(1) //Loop will end when max_occurences_one == -1 && max_occurences_two == -1
+        {
+            auto max_occurence = std::max_element(first_string_counter_sorted.begin(), first_string_counter_sorted.end());
+            int max_occurences_one = max_occurence->first;
 
-        if(Is_Empty(result, first_string_counter_sorted, second_string_counter_sorted, max_occurences_one, max_occurences_two))
-            return;
+            max_occurence = std::max_element(second_string_counter_sorted.begin(), second_string_counter_sorted.end());
+            int max_occurences_two  = max_occurence->first;
 
-        if(max_occurences_one > max_occurences_two)
-        {
-            result.append("1:");
-            Add_Letter_N_times(result, first_string_counter_sorted.at(max_occurences_one), max_occurences_one);
-            first_string_counter_sorted.at(max_occurences_one) = -1;
-        }
-        else if(max_occurences_two > max_occurences_one)
-        {
-            result.append("2:");
-            Add_Letter_N_times(result, second_string_counter_sorted.at(max_occurences_two), max_occurences_two);
-            second_string_counter_sorted.at(max_occurences_two) = -1;
-        }
-        else if(max_occurences_one == max_occurences_two)
-        {
-            /* If letters are the same */
-            if(first_string_counter_sorted.at((max_occurences_one)) == second_string_counter_sorted.at(max_occurences_two))
+            if(max_occurences_one == -1 && max_occurences_two == -1)
+                break;
+
+            if(Is_One_String_Completed(result, first_string_counter_sorted, second_string_counter_sorted,
+                                       max_occurences_one, max_occurences_two))
+                continue;
+
+            if(max_occurences_one > max_occurences_two)
             {
-
+                result.append("1:");
+                Add_Letter_N_times(result, first_string_counter_sorted.at(max_occurences_one), max_occurences_one);
+                first_string_counter_sorted.at(max_occurences_one) = -1;
             }
-            else
+            else if(max_occurences_two > max_occurences_one)
             {
-                //Do lexical sorting
+                result.append("2:");
+                Add_Letter_N_times(result, second_string_counter_sorted.at(max_occurences_two), max_occurences_two);
+                second_string_counter_sorted.at(max_occurences_two) = -1;
             }
-        }
+            else if(max_occurences_one == max_occurences_two)
+            {
+                /* If letters are the same */
+                if(first_string_counter_sorted.at(max_occurences_one) == second_string_counter_sorted.at(max_occurences_two))
+                {
+                    result.append("=:");
+                    Add_Letter_N_times(result, first_string_counter_sorted.at(max_occurences_one), max_occurences_one);
+                }
+                else
+                {
+                    //Do lexical sorting
+                }
 
-        result.push_back('/');
+                first_string_counter_sorted.at(max_occurences_one) = -1;
+                second_string_counter_sorted.at(max_occurences_two) = -1;
+            }
+
+            result.push_back('/');
+        }
     }
 
     static std::string mix(const std::string &s1, const std::string &s2)
@@ -141,7 +155,7 @@ public:
         //If two elements are the same, I check if they have same letters or not.
         //If yes, then I put them as '=:'. If not, then I put them sorted lexically.
 
-        return "";
+        return result;
     }
 };
 
