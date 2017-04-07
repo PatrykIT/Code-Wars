@@ -15,7 +15,8 @@ SOURCES += main.cpp \
     Constructing_a_Car/car.cpp \
     Perfect_Tree/is_perfect.cpp \
     Histogram/histogram.cpp \
-    Valid_Braces/valid_braces.cpp
+    Valid_Braces/valid_braces.cpp \
+    Strings_Mix/strings_mix.cpp
 
 HEADERS += \
     Bundesliga\bundesliga.h

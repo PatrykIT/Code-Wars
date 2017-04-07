@@ -7,7 +7,8 @@
 //#define CAR
 //#define PERFECT_TREE
 //#define HISTOGRAM
-#define VALID_BRACES
+//#define VALID_BRACES
+#define STRINGS_MIX
 
 
 
@@ -52,6 +53,10 @@
 
 #ifdef VALID_BRACES
 #include "Valid_Braces/valid_braces.cpp"
+#endif
+
+#ifdef STRINGS_MIX
+#include "Strings_Mix/strings_mix.cpp"
 #endif
 
 int main(int argc, char *argv[])
@@ -115,6 +120,11 @@ int main(int argc, char *argv[])
 
 #ifdef VALID_BRACES
     bool is_true = valid_braces({"(){}[]"});
+#endif
+
+#ifdef STRINGS_MIX
+    Mix object;
+    object.mix("aaee", "xasz");
 #endif
 
     return 0;
