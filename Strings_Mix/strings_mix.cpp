@@ -88,6 +88,7 @@ public:
 
     static decltype(auto) Get_Maximum_Element(std::multimap<int, char> &string_counter_sorted)
     {
+        //I need to return 'aa', not 'ee' first. So gotta search all biggest elements, and return by lexical order.
         while(1)
         {
             if(string_counter_sorted.empty())
@@ -95,13 +96,43 @@ public:
 
             auto max_occurence_iterator = std::max_element(string_counter_sorted.begin(), string_counter_sorted.end());
 
-            std::cout << "Secon = " << max_occurence_iterator->second << "\n";
-
-            /* If longest letters are marked as already used, delete them. */
             if(max_occurence_iterator->second == used_mark)
+            {
+                std::cout << "Deletion in Get_Maximum_Element shouldn't happen. Deleted item int: "
+                          << max_occurence_iterator->first << "\n";
                 string_counter_sorted.erase(max_occurence_iterator);
-            else
-                return max_occurence_iterator;
+                continue;
+            }
+
+
+            std::cout << "Second = " << max_occurence_iterator->second << "\n";
+
+            /* For example: 'ee' and 'aa' both are same keys (2). I then need to return 'aa', not 'ee'. */
+            bool has_repeating_keys = string_counter_sorted.count(max_occurence_iterator->first) > 1;
+            if(has_repeating_keys)
+            {
+                /* Find biggest letter. */
+                auto all_same_keys = string_counter_sorted.equal_range(max_occurence_iterator->first);
+
+                auto begin_iter = all_same_keys.first;
+                auto end_iter = all_same_keys.second;
+
+                std::multimap<int, char>::iterator biggest_letter;
+                char biggest_number = 'z' + 1;
+
+                for(std::multimap<int, char>::iterator iter = begin_iter; iter != end_iter; ++iter)
+                {
+                    if(iter->second < biggest_number)
+                    {
+                        biggest_letter = iter;
+                        biggest_number = iter->second;
+                    }
+                }
+
+                max_occurence_iterator = biggest_letter;
+            }
+
+            return max_occurence_iterator;
         }
     }
 
@@ -120,6 +151,25 @@ public:
         }
     }
 
+    static void Delete_Zeros(std::multimap<int, char> &to_check_and_delete)
+    {
+        if(!to_check_and_delete.empty())
+        {
+            for(auto iter = to_check_and_delete.begin(); iter != to_check_and_delete.end(); ++iter)
+            {
+                /* Remove character that was used from the map. */
+                if(iter->second == used_mark)
+                {
+                    to_check_and_delete.erase(iter);
+                    if(!to_check_and_delete.empty())
+                        iter = to_check_and_delete.begin();
+                    else
+                        return;
+                }
+            }
+        }
+    }
+
     static void Put_Elements(std::string &result, std::multimap<int, char> &first_string_counter_sorted,
                              std::multimap<int, char> &second_string_counter_sorted)
     {
@@ -128,10 +178,14 @@ public:
         {
             /* Create function: Delete_Zeros, and let it be at the top of the loop, to garbage collect used items. */
 
+            Delete_Zeros(first_string_counter_sorted);
+            Delete_Zeros(second_string_counter_sorted);
+
             auto max_occurences_one = Get_Maximum_Element(first_string_counter_sorted);
             auto max_occurences_two  = Get_Maximum_Element(second_string_counter_sorted);
 
-            if(max_occurences_one->first == -1 && max_occurences_two->first == -1)
+            if(max_occurences_one == first_string_counter_sorted.end() &&
+                    max_occurences_two == second_string_counter_sorted.end())
                 break;
 
             if(Is_One_String_Completed(result, first_string_counter_sorted, second_string_counter_sorted,
