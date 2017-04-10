@@ -114,9 +114,6 @@ public:
                 continue;
             }
 
-
-            std::cout << "Second = " << max_occurence_iterator->second << "\n";
-
             /* For example: 'ee' and 'aa' both are same keys (2). I then need to return 'aa', not 'ee'. */
             bool has_repeating_keys = string_counter_sorted.count(max_occurence_iterator->first) > 1;
             if(has_repeating_keys)
@@ -258,9 +255,6 @@ public:
                 /* If letters are the same */
                 if(first_character == second_character)
                 {   
-                    //result.append("=:");
-                    //Add_Letter_N_times(result, first_character, max_occurences_one->first);
-
                     /* Here I should change so that letters are only pushed back at the end of same number (int). */
                     last_number = max_occurences_one->first;
                     to_append.append("=:");
@@ -279,8 +273,8 @@ public:
             }
 
             /* Skip this push when first_character == second_character */
-            result.push_back('/');
-
+            if(first_character != second_character)
+                result.push_back('/');
         }
 
         if(!to_append.empty())
