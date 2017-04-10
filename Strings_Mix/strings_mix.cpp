@@ -153,19 +153,29 @@ public:
 
     static void Delete_Zeros(std::multimap<int, char> &to_check_and_delete)
     {
-        if(!to_check_and_delete.empty())
+        for(auto iter = to_check_and_delete.begin(); iter != to_check_and_delete.end(); ++iter)
         {
-            for(auto iter = to_check_and_delete.begin(); iter != to_check_and_delete.end(); ++iter)
+            /* Remove character that was used from the map. */
+            if(iter->second == used_mark)
             {
-                /* Remove character that was used from the map. */
-                if(iter->second == used_mark)
-                {
-                    to_check_and_delete.erase(iter);
-                    if(!to_check_and_delete.empty())
-                        iter = to_check_and_delete.begin();
-                    else
-                        return;
-                }
+                to_check_and_delete.erase(iter);
+                if(!to_check_and_delete.empty())
+                    iter = to_check_and_delete.begin();
+                else
+                    return;
+            }
+        }
+    }
+
+
+    static void Remove_Letter(std::multimap<int, char> &delete_from, char letter_to_delete)
+    {
+        for(auto iter = delete_from.begin(); iter != delete_from.end(); ++iter)
+        {
+            if(iter->second == letter_to_delete)
+            {
+                delete_from.erase(iter);
+                return;
             }
         }
     }
@@ -199,12 +209,15 @@ public:
             {
                 result.append("1:");
                 Add_Letter_N_times(result, first_character, max_occurences_one->first);
+                /* Delete from the second string the same letter, because this string won. */
+                Remove_Letter(second_string_counter_sorted, max_occurences_one->second);
                 max_occurences_one->second = used_mark;
             }
             else if(max_occurences_two->first > max_occurences_one->first)
             {
                 result.append("2:");
                 Add_Letter_N_times(result, second_character, max_occurences_two->first);
+                Remove_Letter(first_string_counter_sorted, max_occurences_two->second);
                 max_occurences_two->second = used_mark;
             }
             else if(max_occurences_one->first == max_occurences_two->first)
