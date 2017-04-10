@@ -57,27 +57,37 @@ public:
 
     static bool Is_One_String_Completed(std::string &result, std::multimap<int, char> &first_string_counter_sorted,
                                         std::multimap<int, char> &second_string_counter_sorted,
-                                        const int max_occurences_one, const int max_occurences_two)
+                                        std::multimap<int, char>::iterator max_occurences_one,
+                                        std::multimap<int, char>::iterator max_occurences_two)
     {
-        auto first_char_iter = first_string_counter_sorted.find(max_occurences_one);
-        char first_character = first_char_iter->second;
-        auto second_char_iter = second_string_counter_sorted.find(max_occurences_two);
-        char second_character = second_char_iter->second;
 
-        if(max_occurences_one == -1) //Means second string is not empty yet.
+        if(max_occurences_one != first_string_counter_sorted.end() &&
+                max_occurences_two != second_string_counter_sorted.end())
+            return false;
+
+        char first_character = 'Z';
+        char second_character = 'Z';
+
+        if(max_occurences_one != first_string_counter_sorted.end())
+            first_character = max_occurences_one->second;
+
+        if(max_occurences_two != second_string_counter_sorted.end())
+            second_character = max_occurences_two->second;
+
+        if(max_occurences_one == first_string_counter_sorted.end()) //Means second string is not empty yet.
         {
             result.append("2:");
-            Add_Letter_N_times(result, second_character, max_occurences_two);
-            second_char_iter->second = used_mark;
+            Add_Letter_N_times(result, second_character, max_occurences_two->first);
+            max_occurences_two->second = used_mark;
 
             result.push_back('/');
             return true;
         }
-        else if(max_occurences_two == -1) //Means first string is not empty yet.
+        else if(max_occurences_two == second_string_counter_sorted.end()) //Means first string is not empty yet.
         {
             result.append("1:");
-            Add_Letter_N_times(result, first_character, max_occurences_one);
-            first_char_iter->second = used_mark;
+            Add_Letter_N_times(result, first_character, max_occurences_one->first);
+            max_occurences_one->second = used_mark;
 
             result.push_back('/');
             return true;
@@ -86,7 +96,7 @@ public:
         return false;
     }
 
-    static decltype(auto) Get_Maximum_Element(std::multimap<int, char> &string_counter_sorted)
+    static std::multimap<int, char>::iterator Get_Maximum_Element(std::multimap<int, char> &string_counter_sorted)
     {
         //I need to return 'aa', not 'ee' first. So gotta search all biggest elements, and return by lexical order.
         while(1)
@@ -167,7 +177,8 @@ public:
         }
     }
 
-
+    /** Removes letter from the opposite multimap.
+     * If first string had more occurences of the letter, then we need to remove this letter from the other multimap. */
     static void Remove_Letter(std::multimap<int, char> &delete_from, char letter_to_delete)
     {
         for(auto iter = delete_from.begin(); iter != delete_from.end(); ++iter)
@@ -180,14 +191,30 @@ public:
         }
     }
 
+    static void Append_Buffer(int current_number, int &last_number, std::string &to_append, std::string &result)
+    {
+        /* Means we can append := to the end of string, becuase it is the end of previous number. */
+        if(current_number < last_number)
+        {
+            /* If there is something to append */
+            if(to_append.empty() == false)
+            {
+                result.append(to_append);
+                to_append.clear();
+                last_number = current_number;
+            }
+        }
+    }
+
     static void Put_Elements(std::string &result, std::multimap<int, char> &first_string_counter_sorted,
                              std::multimap<int, char> &second_string_counter_sorted)
     {
+        int last_number = -1; // Change to max int
+        int current_number = -1; // Change to max int
+        std::string to_append = "";
 
-        while(1) //Loop will end when max_occurences_one == -1 && max_occurences_two == -1
+        while(1) //Loop will end when max_occurences_one == .end() && max_occurences_two == -1
         {
-            /* Create function: Delete_Zeros, and let it be at the top of the loop, to garbage collect used items. */
-
             Delete_Zeros(first_string_counter_sorted);
             Delete_Zeros(second_string_counter_sorted);
 
@@ -199,7 +226,7 @@ public:
                 break;
 
             if(Is_One_String_Completed(result, first_string_counter_sorted, second_string_counter_sorted,
-                                       max_occurences_one->first, max_occurences_two->first))
+                                       max_occurences_one, max_occurences_two))
                 continue;
 
             char first_character = max_occurences_one->second;
@@ -207,6 +234,9 @@ public:
 
             if(max_occurences_one->first > max_occurences_two->first)
             {
+                current_number = max_occurences_one->first;
+                Append_Buffer(current_number, last_number, to_append, result);
+
                 result.append("1:");
                 Add_Letter_N_times(result, first_character, max_occurences_one->first);
                 /* Delete from the second string the same letter, because this string won. */
@@ -215,6 +245,9 @@ public:
             }
             else if(max_occurences_two->first > max_occurences_one->first)
             {
+                current_number = max_occurences_two->first;
+                Append_Buffer(current_number, last_number, to_append, result);
+
                 result.append("2:");
                 Add_Letter_N_times(result, second_character, max_occurences_two->first);
                 Remove_Letter(first_string_counter_sorted, max_occurences_two->second);
@@ -224,9 +257,15 @@ public:
             {
                 /* If letters are the same */
                 if(first_character == second_character)
-                {
-                    result.append("=:");
-                    Add_Letter_N_times(result, first_character, max_occurences_one->first);
+                {   
+                    //result.append("=:");
+                    //Add_Letter_N_times(result, first_character, max_occurences_one->first);
+
+                    /* Here I should change so that letters are only pushed back at the end of same number (int). */
+                    last_number = max_occurences_one->first;
+                    to_append.append("=:");
+                    Add_Letter_N_times(to_append, first_character, max_occurences_one->first);
+                    //to_append.push_back('/');
                 }
                 /* If letters are not the same */
                 else
@@ -239,7 +278,15 @@ public:
                 max_occurences_two->second = used_mark;
             }
 
+            /* Skip this push when first_character == second_character */
             result.push_back('/');
+
+        }
+
+        if(!to_append.empty())
+        {
+            result.append(to_append);
+            to_append.clear();
         }
     }
 
@@ -277,7 +324,8 @@ public:
         std::multimap<int, char> first_string_counter_sorted;
         std::multimap<int, char> second_string_counter_sorted;
 
-        Sort_Counters(first_string_counter_sorted, first_string_counter, second_string_counter_sorted, second_string_counter);
+        Sort_Counters(first_string_counter_sorted, first_string_counter,
+                      second_string_counter_sorted, second_string_counter);
 
         std::string result = "";
 
@@ -294,7 +342,12 @@ public:
 
 char Mix::used_mark = '0';
 
-
+/* When you have := they need to be at the end of the same count. Alphabet doesn't matter.
+ * For example:
+ *
+ * 2:dd/2:ff/2:ii/2:rr/=:ee/=:ss
+ *
+ * */
 
 
 
