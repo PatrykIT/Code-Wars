@@ -243,12 +243,13 @@ public:
         }
     }
 
+    /** Removes letters that have count 0 or 1. */
     static void Remove_Empty_Counters(std::map<char, int> &first_string_counter,
                                       std::map<char, int> &second_string_counter)
     {
         for(auto iter = first_string_counter.begin(); iter != first_string_counter.end(); ++iter)
         {
-            if(iter->second == 0) //Means a string doesn't have this letter.
+            if(iter->second < 2)
             {
                 first_string_counter.erase(iter);
                 iter = first_string_counter.begin();
@@ -257,7 +258,7 @@ public:
 
         for(auto iter = second_string_counter.begin(); iter != second_string_counter.end(); ++iter)
         {
-            if(iter->second == 0) //Means a string doesn't have this letter.
+            if(iter->second < 2)
             {
                 iter = second_string_counter.erase(iter);
                 iter = second_string_counter.begin();
