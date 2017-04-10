@@ -53,6 +53,7 @@ public:
     {
         for(int i = 0; i < how_many; ++i)
             result.push_back(letter);
+        result.push_back('/');
     }
 
     static bool Is_One_String_Completed(std::string &result, std::multimap<int, char> &first_string_counter_sorted,
@@ -79,8 +80,6 @@ public:
             result.append("2:");
             Add_Letter_N_times(result, second_character, max_occurences_two->first);
             max_occurences_two->second = used_mark;
-
-            result.push_back('/');
             return true;
         }
         else if(max_occurences_two == second_string_counter_sorted.end()) //Means first string is not empty yet.
@@ -88,8 +87,6 @@ public:
             result.append("1:");
             Add_Letter_N_times(result, first_character, max_occurences_one->first);
             max_occurences_one->second = used_mark;
-
-            result.push_back('/');
             return true;
         }
 
@@ -259,7 +256,6 @@ public:
                     last_number = max_occurences_one->first;
                     to_append.append("=:");
                     Add_Letter_N_times(to_append, first_character, max_occurences_one->first);
-                    //to_append.push_back('/');
                 }
                 /* If letters are not the same */
                 else
@@ -271,10 +267,6 @@ public:
                 max_occurences_one->second = used_mark;
                 max_occurences_two->second = used_mark;
             }
-
-            /* Skip this push when first_character == second_character */
-            if(first_character != second_character)
-                result.push_back('/');
         }
 
         if(!to_append.empty())
@@ -282,29 +274,23 @@ public:
             result.append(to_append);
             to_append.clear();
         }
+
+        result.pop_back(); //Delete last, unnecesary '/'
     }
 
     /** Removes letters that have count 0 or 1. */
     static void Remove_Empty_Counters(std::map<char, int> &first_string_counter,
                                       std::map<char, int> &second_string_counter)
     {
-        for(auto iter = first_string_counter.begin(); iter != first_string_counter.end(); ++iter)
-        {
-            if(iter->second < 2)
-            {
-                first_string_counter.erase(iter);
-                iter = first_string_counter.begin();
-            }
-        }
+        auto iter = first_string_counter.begin();
+        while((iter = std::find_if(iter, first_string_counter.end(), [&](std::pair<char, int> element) { return element.second < 2; } ))
+              != first_string_counter.end())
+            first_string_counter.erase(iter++);
 
-        for(auto iter = second_string_counter.begin(); iter != second_string_counter.end(); ++iter)
-        {
-            if(iter->second < 2)
-            {
-                iter = second_string_counter.erase(iter);
-                iter = second_string_counter.begin();
-            }
-        }
+        iter = second_string_counter.begin();
+        while((iter = std::find_if(iter, second_string_counter.end(), [&](std::pair<char, int> element) { return element.second < 2; } ))
+              != second_string_counter.end())
+            second_string_counter.erase(iter++);
     }
 
     static std::string mix(const std::string &s1, const std::string &s2)
