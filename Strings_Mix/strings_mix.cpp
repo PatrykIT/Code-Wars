@@ -86,16 +86,14 @@ public:
         return false;
     }
 
-    /* Returns current longest repeating letters, and removes used ones from map. */
-    static int Get_Maximum_Element(std::multimap<int, char> &string_counter_sorted)
+    static decltype(auto) Get_Maximum_Element(std::multimap<int, char> &string_counter_sorted)
     {
         while(1)
         {
             if(string_counter_sorted.empty())
-                return -1;
+                return string_counter_sorted.end();
 
             auto max_occurence_iterator = std::max_element(string_counter_sorted.begin(), string_counter_sorted.end());
-            int max_occurence = max_occurence_iterator->first;
 
             std::cout << "Secon = " << max_occurence_iterator->second << "\n";
 
@@ -103,7 +101,7 @@ public:
             if(max_occurence_iterator->second == used_mark)
                 string_counter_sorted.erase(max_occurence_iterator);
             else
-                return max_occurence;
+                return max_occurence_iterator;
         }
     }
 
@@ -130,50 +128,48 @@ public:
         {
             /* Create function: Delete_Zeros, and let it be at the top of the loop, to garbage collect used items. */
 
-            int max_occurences_one = Get_Maximum_Element(first_string_counter_sorted);
-            int max_occurences_two  = Get_Maximum_Element(second_string_counter_sorted);
+            auto max_occurences_one = Get_Maximum_Element(first_string_counter_sorted);
+            auto max_occurences_two  = Get_Maximum_Element(second_string_counter_sorted);
 
-            if(max_occurences_one == -1 && max_occurences_two == -1)
+            if(max_occurences_one->first == -1 && max_occurences_two->first == -1)
                 break;
 
             if(Is_One_String_Completed(result, first_string_counter_sorted, second_string_counter_sorted,
-                                       max_occurences_one, max_occurences_two))
+                                       max_occurences_one->first, max_occurences_two->first))
                 continue;
 
-            auto first_char_iter = first_string_counter_sorted.find(max_occurences_one);
-            char first_character = first_char_iter->second;
-            auto second_char_iter = second_string_counter_sorted.find(max_occurences_two);
-            char second_character = second_char_iter->second;
+            char first_character = max_occurences_one->second;
+            char second_character = max_occurences_two->second;
 
-            if(max_occurences_one > max_occurences_two)
+            if(max_occurences_one->first > max_occurences_two->first)
             {
                 result.append("1:");
-                Add_Letter_N_times(result, first_character, max_occurences_one);
-                first_char_iter->second = used_mark;
+                Add_Letter_N_times(result, first_character, max_occurences_one->first);
+                max_occurences_one->second = used_mark;
             }
-            else if(max_occurences_two > max_occurences_one)
+            else if(max_occurences_two->first > max_occurences_one->first)
             {
                 result.append("2:");
-                Add_Letter_N_times(result, second_character, max_occurences_two);
-                second_char_iter->second = used_mark;
+                Add_Letter_N_times(result, second_character, max_occurences_two->first);
+                max_occurences_two->second = used_mark;
             }
-            else if(max_occurences_one == max_occurences_two)
+            else if(max_occurences_one->first == max_occurences_two->first)
             {
                 /* If letters are the same */
                 if(first_character == second_character)
                 {
                     result.append("=:");
-                    Add_Letter_N_times(result, first_character, max_occurences_one);
+                    Add_Letter_N_times(result, first_character, max_occurences_one->first);
                 }
                 /* If letters are not the same */
                 else
                 {
-                    Put_by_Lexical_Order(max_occurences_one, max_occurences_two, first_character,
+                    Put_by_Lexical_Order(max_occurences_one->first, max_occurences_two->first, first_character,
                                          second_character, result);
                 }
 
-                first_char_iter->second = used_mark;
-                second_char_iter->second = used_mark;
+                max_occurences_one->second = used_mark;
+                max_occurences_two->second = used_mark;
             }
 
             result.push_back('/');
