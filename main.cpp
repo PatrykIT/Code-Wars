@@ -124,7 +124,11 @@ int main(int argc, char *argv[])
 
 #ifdef STRINGS_MIX
     Mix object;
-    object.mix("aaee", "xasz");
+    std::string result;
+
+    result = object.mix("aaee", "xasz");
+    std::cout << result << "\n";
+
 #endif
 
     return 0;
