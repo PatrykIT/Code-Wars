@@ -140,20 +140,29 @@ public:
         }
     }
 
-    static void Put_by_Lexical_Order(int max_occurences_one, int max_occurences_two, char first_character,
-                                     char second_character, std::string &result)
+
+    static void Put_by_Lexical_Order(std::multimap<int, char>::iterator max_occurences_one,
+                                     std::multimap<int, char>::iterator max_occurences_two, char first_character,
+                                     char second_character, std::string &result, std::multimap<int, char> &first_str,
+                                     std::multimap<int, char> &second_str)
     {
-        if(first_character > second_character)
+        if(first_character < second_character)
         {
             result.append("1:");
-            Add_Letter_N_times(result, first_character, max_occurences_one);
+            Add_Letter_N_times(result, first_character, max_occurences_one->first);
+            Remove_Letter_from_other_Map(second_str, first_character);
+            max_occurences_one->second = used_mark;
         }
-        else if(second_character > first_character)
+        else if(second_character < first_character)
         {
             result.append("2:");
-            Add_Letter_N_times(result, second_character, max_occurences_two);
+            Add_Letter_N_times(result, second_character, max_occurences_two->first);
+            Remove_Letter_from_other_Map(first_str, second_character);
+            max_occurences_two->second = used_mark;
         }
     }
+
+
 
     static void Delete_Zeros(std::multimap<int, char> &to_check_and_delete)
     {
@@ -173,7 +182,7 @@ public:
 
     /** Removes letter from the opposite multimap.
      * If first string had more occurences of the letter, then we need to remove this letter from the other multimap. */
-    static void Remove_Letter(std::multimap<int, char> &delete_from, char letter_to_delete)
+    static void Remove_Letter_from_other_Map(std::multimap<int, char> &delete_from, char letter_to_delete)
     {
         for(auto iter = delete_from.begin(); iter != delete_from.end(); ++iter)
         {
@@ -225,47 +234,53 @@ public:
 
             char first_character = max_occurences_one->second;
             char second_character = max_occurences_two->second;
+            int number_of_occurences_one = max_occurences_one->first;
+            int number_of_occurences_two = max_occurences_two->first;
 
-            if(max_occurences_one->first > max_occurences_two->first)
+            if(number_of_occurences_one > number_of_occurences_two)
             {
-                current_number = max_occurences_one->first;
+                current_number = number_of_occurences_one;
                 Append_Buffer(current_number, last_number, to_append, result);
 
                 result.append("1:");
-                Add_Letter_N_times(result, first_character, max_occurences_one->first);
+                Add_Letter_N_times(result, first_character, number_of_occurences_one);
                 /* Delete from the second string the same letter, because this string won. */
-                Remove_Letter(second_string_counter_sorted, max_occurences_one->second);
+                Remove_Letter_from_other_Map(second_string_counter_sorted, first_character);
                 max_occurences_one->second = used_mark;
             }
-            else if(max_occurences_two->first > max_occurences_one->first)
+            else if(number_of_occurences_two > number_of_occurences_one)
             {
-                current_number = max_occurences_two->first;
+                current_number = number_of_occurences_two;
                 Append_Buffer(current_number, last_number, to_append, result);
 
                 result.append("2:");
-                Add_Letter_N_times(result, second_character, max_occurences_two->first);
-                Remove_Letter(first_string_counter_sorted, max_occurences_two->second);
+                Add_Letter_N_times(result, second_character, number_of_occurences_two);
+                /* Delete from the first string the same letter, because this string won. */
+                Remove_Letter_from_other_Map(first_string_counter_sorted, second_character);
                 max_occurences_two->second = used_mark;
             }
-            else if(max_occurences_one->first == max_occurences_two->first)
+            else if(number_of_occurences_one == number_of_occurences_two)
             {
+                current_number = number_of_occurences_one;
+
                 /* If letters are the same */
                 if(first_character == second_character)
                 {   
                     /* Here I should change so that letters are only pushed back at the end of same number (int). */
-                    last_number = max_occurences_one->first;
+                    last_number = number_of_occurences_one;
                     to_append.append("=:");
-                    Add_Letter_N_times(to_append, first_character, max_occurences_one->first);
+                    Add_Letter_N_times(to_append, first_character, number_of_occurences_one);
+                    max_occurences_one->second = used_mark;
+                    max_occurences_two->second = used_mark;
                 }
                 /* If letters are not the same */
                 else
                 {
-                    Put_by_Lexical_Order(max_occurences_one->first, max_occurences_two->first, first_character,
-                                         second_character, result);
+                    Append_Buffer(current_number, last_number, to_append, result);
+                    Put_by_Lexical_Order(max_occurences_one, max_occurences_two,
+                                         first_character, second_character, result,
+                                         first_string_counter_sorted, second_string_counter_sorted);
                 }
-
-                max_occurences_one->second = used_mark;
-                max_occurences_two->second = used_mark;
             }
         }
 
@@ -283,14 +298,20 @@ public:
                                       std::map<char, int> &second_string_counter)
     {
         auto iter = first_string_counter.begin();
-        while((iter = std::find_if(iter, first_string_counter.end(), [&](std::pair<char, int> element) { return element.second < 2; } ))
+        while ( (iter = std::find_if(iter, first_string_counter.end(), [&](std::pair<char, int> element)
+                                        { return element.second < 2; } ) )
               != first_string_counter.end())
+        {
             first_string_counter.erase(iter++);
+        }
 
         iter = second_string_counter.begin();
-        while((iter = std::find_if(iter, second_string_counter.end(), [&](std::pair<char, int> element) { return element.second < 2; } ))
-              != second_string_counter.end())
+        while ( (iter = std::find_if(iter, second_string_counter.end(), [&](std::pair<char, int> element)
+                                        { return element.second < 2; } ))
+              != second_string_counter.end() )
+        {
             second_string_counter.erase(iter++);
+        }
     }
 
     static std::string mix(const std::string &s1, const std::string &s2)
