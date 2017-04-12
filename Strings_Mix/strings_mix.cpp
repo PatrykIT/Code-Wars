@@ -280,6 +280,13 @@ public:
                     Put_by_Lexical_Order(max_occurences_one, max_occurences_two,
                                          first_character, second_character, result,
                                          first_string_counter_sorted, second_string_counter_sorted);
+                    /* Here I need to add sorting that 1: is always before 2: */
+//                    Append_Buffer(current_number, last_number, to_append, result);
+//                    result.append("1:");
+//                    Add_Letter_N_times(result, first_character, number_of_occurences_one);
+//                    /* Delete from the second string the same letter, because this string won. */
+//                    Remove_Letter_from_other_Map(second_string_counter_sorted, first_character);
+//                    max_occurences_one->second = used_mark;
                 }
             }
         }
