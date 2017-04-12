@@ -56,7 +56,8 @@ public:
         result.push_back('/');
     }
 
-    static bool Is_One_String_Completed(std::string &result, std::multimap<int, char> &first_string_counter_sorted,
+    static bool Is_One_String_Completed(std::string &result, std::string &to_append, int current_number, int last_number,
+                                        std::multimap<int, char> &first_string_counter_sorted,
                                         std::multimap<int, char> &second_string_counter_sorted,
                                         std::multimap<int, char>::iterator max_occurences_one,
                                         std::multimap<int, char>::iterator max_occurences_two)
@@ -75,15 +76,21 @@ public:
         if(max_occurences_two != second_string_counter_sorted.end())
             second_character = max_occurences_two->second;
 
-        if(max_occurences_one == first_string_counter_sorted.end()) //Means second string is not empty yet.
+        /* If second string is not empty yet. */
+        if(max_occurences_one == first_string_counter_sorted.end())
         {
+            Append_Buffer(current_number, last_number , to_append, result, true);
+
             result.append("2:");
             Add_Letter_N_times(result, second_character, max_occurences_two->first);
             max_occurences_two->second = used_mark;
             return true;
         }
-        else if(max_occurences_two == second_string_counter_sorted.end()) //Means first string is not empty yet.
+        /* If first string is not empty yet. */
+        else if(max_occurences_two == second_string_counter_sorted.end())
         {
+            Append_Buffer(current_number, last_number , to_append, result, true);
+
             result.append("1:");
             Add_Letter_N_times(result, first_character, max_occurences_one->first);
             max_occurences_one->second = used_mark;
@@ -141,26 +148,26 @@ public:
     }
 
 
-    static void Put_by_Lexical_Order(std::multimap<int, char>::iterator max_occurences_one,
-                                     std::multimap<int, char>::iterator max_occurences_two, char first_character,
-                                     char second_character, std::string &result, std::multimap<int, char> &first_str,
-                                     std::multimap<int, char> &second_str)
-    {
-        if(first_character < second_character)
-        {
-            result.append("1:");
-            Add_Letter_N_times(result, first_character, max_occurences_one->first);
-            Remove_Letter_from_other_Map(second_str, first_character);
-            max_occurences_one->second = used_mark;
-        }
-        else if(second_character < first_character)
-        {
-            result.append("2:");
-            Add_Letter_N_times(result, second_character, max_occurences_two->first);
-            Remove_Letter_from_other_Map(first_str, second_character);
-            max_occurences_two->second = used_mark;
-        }
-    }
+//    static void Put_by_Lexical_Order(std::multimap<int, char>::iterator max_occurences_one,
+//                                     std::multimap<int, char>::iterator max_occurences_two,
+//                                     char first_character, char second_character, std::string &result,
+//                                     std::multimap<int, char> &first_str, std::multimap<int, char> &second_str)
+//    {
+//        if(first_character < second_character)
+//        {
+//            result.append("1:");
+//            Add_Letter_N_times(result, first_character, max_occurences_one->first);
+//            Remove_Letter_from_other_Map(second_str, first_character);
+//            max_occurences_one->second = used_mark;
+//        }
+//        else if(second_character < first_character)
+//        {
+//            result.append("2:");
+//            Add_Letter_N_times(result, second_character, max_occurences_two->first);
+//            Remove_Letter_from_other_Map(first_str, second_character);
+//            max_occurences_two->second = used_mark;
+//        }
+//    }
 
 
 
@@ -194,10 +201,10 @@ public:
         }
     }
 
-    static void Append_Buffer(int current_number, int &last_number, std::string &to_append, std::string &result)
+    static void Append_Buffer(int current_number, int &last_number, std::string &to_append, std::string &result, bool end_of_one_of_strings = false)
     {
         /* Means we can append := to the end of string, becuase it is the end of previous number. */
-        if(current_number < last_number)
+        if(current_number < last_number || end_of_one_of_strings == true)
         {
             /* If there is something to append */
             if(to_append.empty() == false)
@@ -207,6 +214,18 @@ public:
                 last_number = current_number;
             }
         }
+    }
+
+    static bool Check_if_Letter_in_other_Map(std::multimap<int, char> &second_string_counter_sorted, char letter,
+                                             int number_of_occurences_one)
+    {
+        for(auto &element : second_string_counter_sorted)
+        {
+            if(element.second == letter)
+                if(element.first == number_of_occurences_one)
+                    return true;
+        }
+        return false;
     }
 
     static void Put_Elements(std::string &result, std::multimap<int, char> &first_string_counter_sorted,
@@ -228,7 +247,8 @@ public:
                     max_occurences_two == second_string_counter_sorted.end())
                 break;
 
-            if(Is_One_String_Completed(result, first_string_counter_sorted, second_string_counter_sorted,
+            if(Is_One_String_Completed(result, to_append, current_number, last_number,
+                                       first_string_counter_sorted, second_string_counter_sorted,
                                        max_occurences_one, max_occurences_two))
                 continue;
 
@@ -276,17 +296,28 @@ public:
                 /* If letters are not the same */
                 else
                 {
-                    Append_Buffer(current_number, last_number, to_append, result);
-                    Put_by_Lexical_Order(max_occurences_one, max_occurences_two,
-                                         first_character, second_character, result,
-                                         first_string_counter_sorted, second_string_counter_sorted);
                     /* Here I need to add sorting that 1: is always before 2: */
-//                    Append_Buffer(current_number, last_number, to_append, result);
-//                    result.append("1:");
-//                    Add_Letter_N_times(result, first_character, number_of_occurences_one);
-//                    /* Delete from the second string the same letter, because this string won. */
-//                    Remove_Letter_from_other_Map(second_string_counter_sorted, first_character);
-//                    max_occurences_one->second = used_mark;
+                    Append_Buffer(current_number, last_number, to_append, result); //Is this neccessary?
+
+                    if(Check_if_Letter_in_other_Map(second_string_counter_sorted, first_character,
+                                                    number_of_occurences_one) == true)
+                    {
+                        /* When I get here, I need to add some logic.
+                         * I need to add to buffer := and remove letter both maps.*/
+                        to_append.append("=:");
+                        Add_Letter_N_times(to_append, first_character, number_of_occurences_one);
+                        max_occurences_one->second = used_mark;
+                        Remove_Letter_from_other_Map(second_string_counter_sorted, first_character);
+                    }
+                    /* If the letter is not in second map, or is but less often, then we can safely add it. */
+                    else
+                    {
+                        result.append("1:");
+                        Add_Letter_N_times(result, first_character, number_of_occurences_one);
+                        /* Delete from the second string the same letter, because this string won. */
+                        Remove_Letter_from_other_Map(second_string_counter_sorted, first_character);
+                        max_occurences_one->second = used_mark;
+                    }
                 }
             }
         }
