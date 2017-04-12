@@ -56,7 +56,12 @@ public:
         result.push_back('/');
     }
 
-    static bool Is_One_String_Completed(std::string &result, std::string &to_append, int current_number, int last_number,
+    static bool Check_if_Map_Empty(std::multimap<int, char> &first_string_counter_sorted)
+    {
+
+    }
+
+    static bool Is_One_String_Completed(std::string &result, std::string &to_append, int current_number, int &last_number,
                                         std::multimap<int, char> &first_string_counter_sorted,
                                         std::multimap<int, char> &second_string_counter_sorted,
                                         std::multimap<int, char>::iterator max_occurences_one,
@@ -79,7 +84,16 @@ public:
         /* If second string is not empty yet. */
         if(max_occurences_one == first_string_counter_sorted.end())
         {
-            Append_Buffer(current_number, last_number , to_append, result, true);
+            /* Need to check whether append is safe: that is, if in this string is no other
+             * letter(s) with same number of occurences. If yes, then continue(?).
+             * If no, then check if current number is  < last number. If it is less, then append freely. */
+//            if(current_number < last_number)
+//            {
+//                if(Check_if_Same_Occurences_in__Map(second_string_counter_sorted, max_occurences_two->first) == false)
+//                {
+                    Append_Buffer(current_number, last_number , to_append, result, true);
+//                }
+//            }
 
             result.append("2:");
             Add_Letter_N_times(result, second_character, max_occurences_two->first);
@@ -89,7 +103,13 @@ public:
         /* If first string is not empty yet. */
         else if(max_occurences_two == second_string_counter_sorted.end())
         {
-            Append_Buffer(current_number, last_number , to_append, result, true);
+//            if(current_number < last_number)
+//            {
+//                if(Check_if_Same_Occurences_in__Map(first_string_counter_sorted, max_occurences_one->first) == false)
+//                {
+                    Append_Buffer(current_number, last_number , to_append, result, true);
+//                }
+//            }
 
             result.append("1:");
             Add_Letter_N_times(result, first_character, max_occurences_one->first);
@@ -216,6 +236,7 @@ public:
         }
     }
 
+
     static bool Check_if_Letter_in_other_Map(std::multimap<int, char> &second_string_counter_sorted, char letter,
                                              int number_of_occurences_one)
     {
@@ -227,6 +248,22 @@ public:
         }
         return false;
     }
+
+    static bool Check_if_Same_Occurences_in__Map(std::multimap<int, char> &second_string_counter_sorted,
+                                             int number_of_occurences_one)
+    {
+        int counter = 0;
+        for(auto &element : second_string_counter_sorted)
+        {
+            if(element.first == number_of_occurences_one)
+                ++counter;
+
+        }
+
+        /* If counter > 0 that means that there was at least one occurence */
+        return counter > 0;
+    }
+
 
     static void Put_Elements(std::string &result, std::multimap<int, char> &first_string_counter_sorted,
                              std::multimap<int, char> &second_string_counter_sorted)
@@ -247,15 +284,42 @@ public:
                     max_occurences_two == second_string_counter_sorted.end())
                 break;
 
-            if(Is_One_String_Completed(result, to_append, current_number, last_number,
-                                       first_string_counter_sorted, second_string_counter_sorted,
-                                       max_occurences_one, max_occurences_two))
-                continue;
+//            if(Is_One_String_Completed(result, to_append, current_number, last_number,
+//                                       first_string_counter_sorted, second_string_counter_sorted,
+//                                       max_occurences_one, max_occurences_two))
+//            {
+//                continue;
+//            }
 
-            char first_character = max_occurences_one->second;
-            char second_character = max_occurences_two->second;
-            int number_of_occurences_one = max_occurences_one->first;
-            int number_of_occurences_two = max_occurences_two->first;
+            /* Try to make this as universal so Is_One_String_Completed is useless. */
+            char first_character, second_character;
+            int number_of_occurences_one, number_of_occurences_two;
+
+            if(max_occurences_one != first_string_counter_sorted.end())
+            {
+                first_character = max_occurences_one->second;
+                number_of_occurences_one = max_occurences_one->first;
+            }
+            else
+            {
+                first_character = 'Z';
+                number_of_occurences_one = -1;
+            }
+
+            if(max_occurences_two != second_string_counter_sorted.end())
+            {
+                second_character = max_occurences_two->second;
+                number_of_occurences_two = max_occurences_two->first;
+            }
+            else
+            {
+                second_character = 'Z';
+                number_of_occurences_two = -1;
+            }
+
+
+            if(number_of_occurences_one == -1 && number_of_occurences_two == -1)
+                break;
 
             if(number_of_occurences_one > number_of_occurences_two)
             {
