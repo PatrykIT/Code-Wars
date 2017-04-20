@@ -13,43 +13,51 @@ std::map<int, std::string> compound_statements {
                                     {90, "XC"}, {400, "CD"}, {900, "CM"}
                                    };
 
-unsigned GetNumberOfDigits (unsigned i)
+
+int Get_First_Digit(int number)
 {
-    return i > 0 ? (int) log10 ((double) i) + 1 : 1;
+    while(number >= 10)
+    {
+        number = number / 10;
+    }
+
+    return number;
 }
 
 int Split_Number(int number)
 {
-//    /* Single digit */
-//    if (number < 10)
-//        return number;
-//    /* Two digit */
-//    if(number < 100)
-//    {
-//        //For 98 returns 98 - 8, so 90.
-//        int leftover = number % 10;
-//        return number - leftover;
-//    }
-
-//    if(number > 100)
-//    {
-//        //For 104 return 100.
-//        //For 1045 return 1000.
-//        //So I could count how many digits there is, and then just return [first digit + nr_of_digits as 0's].
-//    }
-
-    int number_of_digits = GetNumberOfDigits(number);
     /* For 204 we want 2 + (00). So 2 * 100. So 2 * (10 ^ 2).
-     * For 3456 we want 3 + 000. So 3 * 1000. So 2 * (10 ^ 3)*/
+     * For 3456 we want 3 + 000. So 3 * 1000. So 2 * (10 ^ 3) */
+    int number_of_digits = [number] () { return number > 0 ? (int) log10 ((double) number) + 1 : 1; }();
+    int first_digit = Get_First_Digit(number);
+    int base = std::pow(10, number_of_digits -1);
 
-    return final_number_result; //Test it!
+    return first_digit * base;
 }
 
+bool Check_If_Compound_Statement_Possible(int number)
+{
+
+}
 
 std::string solution(int number)
 {
     number = 99;
-    std::cout << Split_Number(975) << "\n";
+    int stripped_number;
+    std::string result = "";
+
+    stripped_number = Split_Number(number);
+
+
+
+
+
+    /* 99 -> 99 - 9 -> 9. */
+    number = number - stripped_number;
+
+
+
+
 
 }
 
