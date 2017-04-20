@@ -3,12 +3,12 @@
 #include <map>
 #include <cmath>
 
-std::map<int, std::string> letters {
+const std::map<int, std::string> letters {
                                     {1, "I"}, {5, "V"}, {10, "X"},
                                     {50, "L"}, {100, "C"}, {500, "D"}, {1000, "M"}
                                    };
 
-std::map<int, std::string> compound_statements {
+const std::map<int, std::string> compound_statements {
                                     {4, "IV"}, {9, "IX"}, {40, "XL"},
                                     {90, "XC"}, {400, "CD"}, {900, "CM"}
                                    };
@@ -37,28 +37,75 @@ int Split_Number(int number)
 
 bool Check_If_Compound_Statement_Possible(int number)
 {
+    if(compound_statements.find(number) != compound_statements.end())
+        return true;
+    return false;
+}
 
+decltype(auto) Find_Closest_Element(int number)
+{
+    std::map<int, std::string>::const_iterator closest_element = letters.end();
+    int closest_number = -1;
+
+    for(auto element = letters.begin(); element != letters.end(); ++element)
+    {
+        if(element->first < number)
+        {
+            if(element->first > closest_number)
+            {
+                closest_number = element->first;
+                closest_element = element;
+            }
+        }
+    }
+
+    return closest_element;
+}
+
+void Append_Letters(int number, std::string &result)
+{
+    while(number != 0)
+    {
+        /* Try to find exact value */
+        auto iter = letters.find(number);
+        if(iter != letters.end())
+        {
+            result.append(letters.at(number));
+            return;
+        }
+        /* If exact value wasn't found, find the closest one, but not bigger. */
+        else
+        {
+             std::map<int, std::string>::const_iterator closest_element = Find_Closest_Element(number);
+             result.append(closest_element->second);
+             number -= closest_element->first;
+        }
+    }
 }
 
 std::string solution(int number)
 {
-    number = 99;
     int stripped_number;
     std::string result = "";
 
-    stripped_number = Split_Number(number);
+    while(number != 0)
+    {
+        stripped_number = Split_Number(number);
+        if(Check_If_Compound_Statement_Possible(stripped_number))
+        {
+            result.append(compound_statements.at(stripped_number));
+        }
+        else
+        {
+            Append_Letters(stripped_number, result);
+        }
+
+        /* 99 -> 99 - 9 -> 9. */
+        number = number - stripped_number;
+    }
 
 
-
-
-
-    /* 99 -> 99 - 9 -> 9. */
-    number = number - stripped_number;
-
-
-
-
-
+    return result;
 }
 
 /*
