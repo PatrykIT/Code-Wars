@@ -168,28 +168,6 @@ public:
     }
 
 
-//    static void Put_by_Lexical_Order(std::multimap<int, char>::iterator max_occurences_one,
-//                                     std::multimap<int, char>::iterator max_occurences_two,
-//                                     char first_character, char second_character, std::string &result,
-//                                     std::multimap<int, char> &first_str, std::multimap<int, char> &second_str)
-//    {
-//        if(first_character < second_character)
-//        {
-//            result.append("1:");
-//            Add_Letter_N_times(result, first_character, max_occurences_one->first);
-//            Remove_Letter_from_other_Map(second_str, first_character);
-//            max_occurences_one->second = used_mark;
-//        }
-//        else if(second_character < first_character)
-//        {
-//            result.append("2:");
-//            Add_Letter_N_times(result, second_character, max_occurences_two->first);
-//            Remove_Letter_from_other_Map(first_str, second_character);
-//            max_occurences_two->second = used_mark;
-//        }
-//    }
-
-
 
     static void Delete_Zeros(std::multimap<int, char> &to_check_and_delete)
     {
