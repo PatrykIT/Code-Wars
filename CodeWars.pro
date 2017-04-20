@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     Perfect_Tree/is_perfect.cpp \
     Histogram/histogram.cpp \
     Valid_Braces/valid_braces.cpp \
-    Strings_Mix/strings_mix.cpp
+    Strings_Mix/strings_mix.cpp \
+    Roman_Numerals_Encoder/roman_numerals_encoder.cpp
 
 HEADERS += \
     Bundesliga\bundesliga.h

@@ -8,7 +8,8 @@
 //#define PERFECT_TREE
 //#define HISTOGRAM
 //#define VALID_BRACES
-#define STRINGS_MIX
+//#define STRINGS_MIX
+#define ROMAN_NUMERALS_ENCODER
 
 
 
@@ -57,6 +58,11 @@
 
 #ifdef STRINGS_MIX
 #include "Strings_Mix/strings_mix.cpp"
+#endif
+
+
+#ifdef ROMAN_NUMERALS_ENCODER
+#include "Roman_Numerals_Encoder/roman_numerals_encoder.cpp"
 #endif
 
 int main(int argc, char *argv[])
@@ -125,11 +131,16 @@ int main(int argc, char *argv[])
 #ifdef STRINGS_MIX
     Mix object;
     std::string result;
-
-    result = object.mix("aaee", "xasz");
+    result = object.mix("xxxx ggg",
+                        "qqq ggg aa hh oo ss");
     std::cout << result << "\n";
 
 #endif
+
+#ifdef ROMAN_NUMERALS_ENCODER
+    std::string result = solution(10);
+#endif
+
 
     return 0;
 }
