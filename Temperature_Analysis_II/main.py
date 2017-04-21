@@ -15,13 +15,15 @@ def Check_if_Closer_Negative(number, number2):
 
 
 def close_to_zero(t):
-    print ("String: " + t)
     if not t:
         return 0
+
     numbers = [int(n) for n in t.split()]
     closest_to_zero = numbers[0]
+
     if 0 in numbers:
         return 0
+
     for temperature in numbers:
         #Handle negatives
         if (temperature < 0 ):
